@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de Produção de Biscoitos - Rolo, Empacotadoras e Bobinas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#08111f;
+    color:#f2f7ff;
+  }
+  header{
+    background:linear-gradient(135deg,#0d1b31,#593816,#111827);
+    border-bottom:3px solid #f0b35b;
+    text-align:center;
+    padding:24px 14px;
+  }
+  header h1{margin:0;font-size:28px}
+  header p{margin:8px 0 0;color:#ffe0b5}
+  main{max-width:1420px;margin:auto;padding:16px}
+  .layout{
+    display:grid;
+    grid-template-columns:395px 1fr;
+    gap:16px;
+  }
+  .card{
+    background:#101b2d;
+    border:1px solid #314760;
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 0 20px rgba(0,0,0,.28);
+  }
+  h2{margin:0 0 12px;font-size:20px;color:#ffd08a}
+  h3{margin:18px 0 8px;font-size:16px;color:#e9f2ff}
+  label{
+    display:block;
+    margin-top:10px;
+    margin-bottom:4px;
+    font-size:14px;
+    font-weight:bold;
+    color:#dcecff;
+  }
+  input,select{
+    width:100%;
+    padding:11px;
+    border-radius:11px;
+    border:1px solid #46617d;
+    background:#07111f;
+    color:white;
+    outline:none;
+    font-size:15px;
+  }
+  input:focus,select:focus{border-color:#f0b35b}
+  button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#e98725;
+    color:#111827;
+    font-weight:bold;
+    margin-top:12px;
+    cursor:pointer;
+    font-size:15px;
+  }
+  button:hover{background:#ffb55b}
+  .btnPrint{background:#2bb673;color:#06111f}
+  .btnPrint:hover{background:#5bf0a5}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .check{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    color:#cfe6ff;
+    margin-top:10px;
+    font-size:14px;
+  }
+  .check input{width:auto}
+  .resultGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .metric{
+    background:#07111f;
+    border:1px solid #314760;
+    border-radius:16px;
+    padding:13px;
+    min-height:96px;
+  }
+  .metric .title{color:#b9d2ec;font-size:13px;margin-bottom:7px}
+  .metric .value{color:#fff;font-size:24px;font-weight:bold}
+  .metric .small{color:#b9d2ec;font-size:12px;margin-top:6px;line-height:1.3}
+  #canvas{
+    width:100%;
+    height:585px;
+    display:block;
+    background:linear-gradient(#fff6e8,#dbeaff);
+    border:1px solid #8bb7db;
+    border-radius:18px;
+  }
+  .explain{
+    background:#07111f;
+    border-left:5px solid #e98725;
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+    color:#dcecff;
+    line-height:1.5;
+  }
+  .formula{
+    background:#091426;
+    color:#ffdf93;
+    border:1px solid #304969;
+    padding:8px;
+    border-radius:8px;
+    font-family:Consolas, monospace;
+    overflow:auto;
+    margin-top:6px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    overflow:hidden;
+    border-radius:12px;
+    font-size:14px;
+  }
+  th,td{
+    padding:9px;
+    border-bottom:1px solid #314760;
+    text-align:left;
+  }
+  th{background:#142a42;color:#ffe0b5}
+  td{background:#081525;color:#e8f3ff}
+  .pill{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-weight:bold;
+    color:#111827;
+  }
+  .ok{background:#83f6a5}
+  .warn{background:#ffe36d}
+  .bad{background:#ff7777}
+  footer{text-align:center;padding:18px;color:#adc2d6}
+  .printOnly,.reportBox{display:none}
+
+  @media(max-width:1050px){
+    .layout{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr 1fr}
+    #canvas{height:500px}
+  }
+  @media(max-width:560px){
+    .row,.row3{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr}
+    header h1{font-size:22px}
+  }
+
+  @media print{
+    body{background:white!important;color:#111827!important}
+    header,footer,.layout{display:none!important}
+    main{max-width:100%;padding:0;margin:0}
+    .printOnly,.reportBox{display:block!important}
+    .reportBox{
+      background:white!important;
+      color:#111827!important;
+      padding:20px;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+    .reportHeader{
+      border-bottom:3px solid #111827;
+      padding-bottom:10px;
+      margin-bottom:12px;
+      text-align:center;
+    }
+    .reportHeader h1{margin:0;font-size:22px}
+    .reportHeader p{margin:4px 0;font-size:13px}
+    .reportGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .reportCard{
+      border:1px solid #333;
+      border-radius:8px;
+      padding:8px;
+      min-height:48px;
+    }
+    .reportCard strong{
+      display:block;
+      font-size:12px;
+      color:#333;
+      margin-bottom:4px;
+    }
+    .reportCard span{
+      font-size:16px;
+      font-weight:bold;
+    }
+    .reportTable{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      font-size:12px;
+    }
+    .reportTable th,.reportTable td{
+      border:1px solid #333;
+      padding:7px;
+      color:#111827!important;
+      background:white!important;
+    }
+    .reportTable th{background:#eeeeee!important}
+    .assinaturas{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:40px;
+      margin-top:50px;
+      font-size:12px;
+    }
+    .linhaAss{
+      border-top:1px solid #111827;
+      text-align:center;
+      padding-top:6px;
+    }
+    @page{size:A4;margin:12mm}
+  }
+</style>
+
+<style>
+  .rvmini-menu{
+    position:sticky;top:0;z-index:99999;
+    background:rgba(2,8,23,.88);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid rgba(125,211,252,.28);
+    box-shadow:0 12px 35px rgba(0,0,0,.28);
+    font-family:Arial,Helvetica,sans-serif;
+  }
+  .rvmini-wrap{max-width:1500px;margin:auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .rvmini-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:900;letter-spacing:.2px}
+  .rvmini-badge{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#f59e0b);display:grid;place-items:center;color:#06111f;box-shadow:0 0 22px rgba(56,189,248,.45)}
+  .rvmini-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .rvmini-links a{color:#dbeafe;text-decoration:none;font-weight:700;font-size:13px;padding:9px 11px;border:1px solid rgba(148,163,184,.18);border-radius:12px;background:rgba(15,23,42,.55)}
+  .rvmini-links a:hover{border-color:#38bdf8;color:#fff;background:rgba(56,189,248,.14)}
+  @media(max-width:740px){
+    .rvmini-wrap{align-items:flex-start;flex-direction:column}
+    .rvmini-links{width:100%;display:grid;grid-template-columns:1fr 1fr}
+    .rvmini-links a{text-align:center}
+  }
+</style>
+
+</head>
+<body>
+
+<nav class="rvmini-menu">
+  <div class="rvmini-wrap">
+    <a class="rvmini-brand" href="index.html"><span class="rvmini-badge">RV</span><span>Portal Processos & Engenharia 2026</span></a>
+    <div class="rvmini-links">
+      <a href="index.html">🏠 Entrada</a>
+      <a href="processos_linha_biscoitos_v1.html">🍪 Linha Biscoitos</a>
+      <a href="processos_empacotadoras_bobinas.html">📦 Empacotadoras</a>
+      <a href="engenharia_caixas_pallet.html">🏗️ Engenharia</a>
+    </div>
+  </div>
+</nav>
+
+
+<header>
+  <h1>Calculadora de Produção de Biscoitos</h1>
+  <p>Rolo moldador, peso cru/assado, empacotadoras, pacotes por minuto, bobinas e relatório</p>
+</header>
+
+<main>
+  <div class="layout">
+
+    <section class="card">
+      <h2>Entrada de produção</h2>
+
+      <h3>Dados para relatório</h3>
+      <div class="row">
+        <div>
+          <label>Produto / sabor</label>
+          <input id="produto" value="Biscoito">
+        </div>
+        <div>
+          <label>Lote / OP</label>
+          <input id="lote" value="OP-001">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Operador</label>
+          <input id="operador" value="">
+        </div>
+        <div>
+          <label>Turno</label>
+          <input id="turno" value="1º Turno">
+        </div>
+      </div>
+
+      <h3>Rolo moldador</h3>
+      <label>Modo de cálculo dos giros</label>
+      <select id="modoGiro" onchange="trocarModo()">
+        <option value="total">Informar giros totais do rolo</option>
+        <option value="rpm">Calcular por RPM × tempo</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label>Total de formas no rolo</label>
+          <input id="formas" type="number" min="1" step="1" value="80">
+        </div>
+        <div id="boxGiros">
+          <label>Giros totais do rolo</label>
+          <input id="giros" type="number" min="0" step="1" value="100">
+        </div>
+      </div>
+
+      <div id="boxRpm" style="display:none;">
+        <div class="row">
+          <div>
+            <label>RPM do rolo</label>
+            <input id="rpm" type="number" min="0" step="0.1" value="25">
+          </div>
+          <div>
+            <label>Tempo de produção (min)</label>
+            <input id="tempoMin" type="number" min="0" step="0.1" value="10">
+          </div>
+        </div>
+      </div>
+
+      <h3>Peso por unidade</h3>
+      <div class="row">
+        <div>
+          <label>Gramas do biscoito cru</label>
+          <input id="gCru" type="number" min="0" step="0.01" value="8.5">
+        </div>
+        <div>
+          <label>Gramas do biscoito assado</label>
+          <input id="gAssado" type="number" min="0" step="0.01" value="7.2">
+        </div>
+      </div>
+
+      <h3>Perdas e embalagem</h3>
+      <div class="row">
+        <div>
+          <label>Perda/quebra no processo (%)</label>
+          <input id="perdaProc" type="number" min="0" max="100" step="0.1" value="2">
+        </div>
+        <div>
+          <label>Peso por pacote (g)</label>
+          <input id="pesoPacote" type="number" min="1" step="1" value="300">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Pacotes por caixa</label>
+          <input id="pacotesCaixa" type="number" min="1" step="1" value="20">
+        </div>
+        <div>
+          <label>Meta de produção assada (kg)</label>
+          <input id="metaKg" type="number" min="0" step="0.1" value="50">
+        </div>
+      </div>
+
+      <h3>Empacotadoras</h3>
+      <div class="row">
+        <div>
+          <label>Total de máquinas empacotadoras</label>
+          <input id="maqEmp" type="number" min="1" step="1" value="2">
+        </div>
+        <div>
+          <label>Pacotes por minuto por máquina</label>
+          <input id="ppmMaq" type="number" min="0" step="0.1" value="45">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tempo de empacotamento disponível (min)</label>
+          <input id="tempoEmpMin" type="number" min="0" step="0.1" value="60">
+        </div>
+        <div>
+          <label>Eficiência das empacotadoras (%)</label>
+          <input id="eficEmp" type="number" min="1" max="100" step="1" value="85">
+        </div>
+      </div>
+
+      <h3>Bobinas de embalagem</h3>
+      <div class="row">
+        <div>
+          <label>Peso de 1 bobina cheia (kg)</label>
+          <input id="kgBobina" type="number" min="0.01" step="0.1" value="15">
+        </div>
+        <div>
+          <label>Consumo de bobina por pacote (g)</label>
+          <input id="gBobinaPacote" type="number" min="0.01" step="0.01" value="2.8">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Bobinas já montadas nas máquinas</label>
+          <input id="bobinasInicio" type="number" min="0" step="1" value="2">
+        </div>
+        <div>
+          <label>Alerta para troca com sobra (%)</label>
+          <input id="alertaBobinaPct" type="number" min="1" max="50" step="1" value="10">
+        </div>
+      </div>
+
+      <label class="check">
+        <input id="animar" type="checkbox" checked>
+        Animar rolo, esteira, forno, empacotadoras e bobinas
+      </label>
+
+      <button onclick="calcular()">Calcular produção</button>
+      <button class="btnPrint" onclick="imprimirRelatorio()">Imprimir relatório</button>
+      <button onclick="exemploPequeno()">Exemplo linha pequena</button>
+      <button onclick="exemploIndustrial()">Exemplo industrial</button>
+
+      <div class="explain">
+        O cálculo principal é:
+        <div class="formula">unidades = formas do rolo × giros do rolo</div>
+        <div class="formula">kg cru = unidades × gramas cru ÷ 1000</div>
+        <div class="formula">kg assado = unidades × gramas assado ÷ 1000</div>
+        <div class="formula">pacotes/min total = máquinas × pacotes/min por máquina × eficiência</div>
+        <div class="formula">bobinas usadas = consumo total de filme ÷ kg por bobina</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>Desenho animado do processo</h2>
+        <canvas id="canvas" width="1000" height="585"></canvas>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>Resultados principais</h2>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Total de biscoitos formados</div>
+            <div id="rUnidades" class="value">--</div>
+            <div id="rGiros" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Produção boa após perdas</div>
+            <div id="rBoa" class="value">--</div>
+            <div id="rBoaDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Pacotes por minuto total</div>
+            <div id="rPPMTotal" class="value">--</div>
+            <div id="rPPMDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Bobinas necessárias</div>
+            <div id="rBobinas" class="value">--</div>
+            <div id="rBobinasDetalhe" class="small">--</div>
+          </div>
+        </div>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Peso total cru</div>
+            <div id="rCru" class="value">--</div>
+            <div id="rCruDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Peso total assado</div>
+            <div id="rAssado" class="value">--</div>
+            <div id="rAssadoDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Capacidade de empacotamento</div>
+            <div id="rCapEmp" class="value">--</div>
+            <div id="rCapEmpDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Troca de bobina</div>
+            <div id="rTrocaBobina" class="value">--</div>
+            <div id="rTrocaDetalhe" class="small">--</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Resultado</th>
+              <th>Interpretação</th>
+            </tr>
+          </thead>
+          <tbody id="tabela"></tbody>
+        </table>
+
+        <div class="explain">
+          <strong>Como usar na fábrica:</strong><br>
+          Informe as formas do rolo, giros/RPM, peso cru e assado. Depois informe quantas empacotadoras trabalham, quantos pacotes por minuto cada uma faz, o peso da bobina e o consumo de filme por pacote. O programa mostra produção, capacidade, bobinas usadas e momento de troca.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <section id="relatorioImpressao" class="printOnly reportBox">
+    <div class="reportHeader">
+      <h1>RELATÓRIO DE PRODUÇÃO DE BISCOITOS</h1>
+      <p>Controle por rolo moldador, empacotadoras, bobinas e peso de produção</p>
+      <p id="repData">Data: --</p>
+    </div>
+
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Produto / sabor</strong><span id="repProduto">--</span></div>
+      <div class="reportCard"><strong>Lote / OP</strong><span id="repLote">--</span></div>
+      <div class="reportCard"><strong>Operador</strong><span id="repOperador">--</span></div>
+      <div class="reportCard"><strong>Turno</strong><span id="repTurno">--</span></div>
+    </div>
+
+    <h2 style="color:#111827;margin-top:16px;">Resumo calculado</h2>
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Total de biscoitos formados</strong><span id="repUnidades">--</span></div>
+      <div class="reportCard"><strong>Giros usados</strong><span id="repGiros">--</span></div>
+      <div class="reportCard"><strong>Peso total cru</strong><span id="repCru">--</span></div>
+      <div class="reportCard"><strong>Peso total assado</strong><span id="repAssado">--</span></div>
+      <div class="reportCard"><strong>Produção boa</strong><span id="repBoa">--</span></div>
+      <div class="reportCard"><strong>Pacotes produzidos</strong><span id="repPacotes">--</span></div>
+      <div class="reportCard"><strong>Pacotes/min total</strong><span id="repPPM">--</span></div>
+      <div class="reportCard"><strong>Bobinas necessárias</strong><span id="repBobinas">--</span></div>
+    </div>
+
+    <table class="reportTable">
+      <thead>
+        <tr>
+          <th>Parâmetro</th>
+          <th>Valor</th>
+          <th>Resultado / Observação</th>
+        </tr>
+      </thead>
+      <tbody id="repTabela"></tbody>
+    </table>
+
+    <h2 style="color:#111827;margin-top:16px;">Fórmulas utilizadas</h2>
+    <table class="reportTable">
+      <tbody>
+        <tr><td>Unidades</td><td>formas do rolo × giros do rolo</td></tr>
+        <tr><td>Peso cru em kg</td><td>unidades × gramas do biscoito cru ÷ 1000</td></tr>
+        <tr><td>Peso assado em kg</td><td>unidades × gramas do biscoito assado ÷ 1000</td></tr>
+        <tr><td>Produção boa</td><td>peso assado × (1 - perda do processo ÷ 100)</td></tr>
+        <tr><td>Pacotes/min total</td><td>máquinas × pacotes/min por máquina × eficiência</td></tr>
+        <tr><td>Bobinas usadas</td><td>pacotes × consumo de bobina por pacote ÷ 1000 ÷ kg por bobina</td></tr>
+      </tbody>
+    </table>
+
+    <div class="assinaturas">
+      <div class="linhaAss">Assinatura do operador</div>
+      <div class="linhaAss">Conferência / responsável</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Simulador HTML + CSS + JavaScript para produção de biscoitos por rolo moldador, empacotadoras e bobinas
+</footer>
+
+<script>
+let dados = {};
+let t = 0;
+
+function n(id){
+  return Number(document.getElementById(id).value);
+}
+
+function v(id){
+  return (document.getElementById(id).value || "").trim();
+}
+
+function fmt(num, casas=2){
+  if(!isFinite(num)) return "0";
+  return num.toLocaleString("pt-BR", {minimumFractionDigits: casas, maximumFractionDigits: casas});
+}
+
+function inteiro(num){
+  if(!isFinite(num)) return "0";
+  return Math.floor(num).toLocaleString("pt-BR");
+}
+
+function arredCima(num){
+  if(!isFinite(num)) return 0;
+  return Math.ceil(num);
+}
+
+function trocarModo(){
+  const modo = document.getElementById("modoGiro").value;
+  document.getElementById("boxGiros").style.display = modo === "total" ? "block" : "none";
+  document.getElementById("boxRpm").style.display = modo === "rpm" ? "block" : "none";
+  calcular();
+}
+
+function calcular(){
+  const modo = document.getElementById("modoGiro").value;
+  const formas = Math.max(1, n("formas"));
+  let giros = Math.max(0, n("giros"));
+  const rpm = Math.max(0, n("rpm"));
+  const tempoMin = Math.max(0, n("tempoMin"));
+
+  if(modo === "rpm"){
+    giros = rpm * tempoMin;
+  }
+
+  const gCru = Math.max(0, n("gCru"));
+  const gAssado = Math.max(0, n("gAssado"));
+  const perdaProc = Math.min(100, Math.max(0, n("perdaProc")));
+  const pesoPacote = Math.max(1, n("pesoPacote"));
+  const pacotesCaixa = Math.max(1, n("pacotesCaixa"));
+  const metaKg = Math.max(0, n("metaKg"));
+
+  const maqEmp = Math.max(1, n("maqEmp"));
+  const ppmMaq = Math.max(0, n("ppmMaq"));
+  const tempoEmpMin = Math.max(0, n("tempoEmpMin"));
+  const eficEmp = Math.min(100, Math.max(1, n("eficEmp")));
+
+  const kgBobina = Math.max(0.01, n("kgBobina"));
+  const gBobinaPacote = Math.max(0.01, n("gBobinaPacote"));
+  const bobinasInicio = Math.max(0, n("bobinasInicio"));
+  const alertaBobinaPct = Math.min(50, Math.max(1, n("alertaBobinaPct")));
+
+  const unidades = formas * giros;
+  const kgCru = unidades * gCru / 1000;
+  const kgAssado = unidades * gAssado / 1000;
+
+  const perdaFornoKg = Math.max(0, kgCru - kgAssado);
+  const perdaFornoPct = kgCru > 0 ? (perdaFornoKg / kgCru) * 100 : 0;
+  const rendimentoFornoPct = kgCru > 0 ? (kgAssado / kgCru) * 100 : 0;
+
+  const kgBom = kgAssado * (1 - perdaProc / 100);
+  const kgQuebra = kgAssado - kgBom;
+  const unidadesBoas = unidades * (1 - perdaProc / 100);
+
+  const pacotes = Math.floor((kgBom * 1000) / pesoPacote);
+  const kgEmpacotado = pacotes * pesoPacote / 1000;
+  const sobraKg = Math.max(0, kgBom - kgEmpacotado);
+  const caixas = Math.floor(pacotes / pacotesCaixa);
+  const pacotesSobra = pacotes % pacotesCaixa;
+
+  const faltaMeta = Math.max(0, metaKg - kgBom);
+  const sobraMeta = Math.max(0, kgBom - metaKg);
+  const girosParaMeta = (formas * gAssado * (1 - perdaProc/100)) > 0
+    ? (metaKg * 1000) / (formas * gAssado * (1 - perdaProc/100))
+    : 0;
+
+  // Empacotamento
+  const ppmTotalTeorico = maqEmp * ppmMaq;
+  const ppmTotalEfetivo = ppmTotalTeorico * (eficEmp / 100);
+  const capacidadePacotes = Math.floor(ppmTotalEfetivo * tempoEmpMin);
+  const tempoNecessarioEmp = ppmTotalEfetivo > 0 ? pacotes / ppmTotalEfetivo : 0;
+  const capacidadeKg = capacidadePacotes * pesoPacote / 1000;
+  const saldoPacotes = capacidadePacotes - pacotes;
+  const gargaloEmp = saldoPacotes < 0;
+
+  // Bobinas
+  const consumoFilmeKg = pacotes * gBobinaPacote / 1000;
+  const bobinasExatas = consumoFilmeKg / kgBobina;
+  const bobinasNecessarias = Math.ceil(bobinasExatas);
+  const bobinasTroca = Math.max(0, bobinasNecessarias - bobinasInicio);
+  const pacotesPorBobina = Math.floor((kgBobina * 1000) / gBobinaPacote);
+  const kgProdutoPorBobina = pacotesPorBobina * pesoPacote / 1000;
+  const tempoPorBobinaMin = ppmMaq > 0 ? pacotesPorBobina / ppmMaq : 0;
+  const alertaKgBobina = kgBobina * (alertaBobinaPct / 100);
+  const alertaPacotesRestantes = Math.floor((alertaKgBobina * 1000) / gBobinaPacote);
+  const alertaMinAntes = ppmMaq > 0 ? alertaPacotesRestantes / ppmMaq : 0;
+
+  dados = {
+    modo, formas, giros, rpm, tempoMin, gCru, gAssado, perdaProc, pesoPacote,
+    pacotesCaixa, metaKg, unidades, kgCru, kgAssado, perdaFornoKg, perdaFornoPct,
+    rendimentoFornoPct, kgBom, kgQuebra, unidadesBoas, pacotes, kgEmpacotado,
+    sobraKg, caixas, pacotesSobra, faltaMeta, sobraMeta, girosParaMeta,
+    maqEmp, ppmMaq, tempoEmpMin, eficEmp, ppmTotalTeorico, ppmTotalEfetivo,
+    capacidadePacotes, tempoNecessarioEmp, capacidadeKg, saldoPacotes, gargaloEmp,
+    kgBobina, gBobinaPacote, bobinasInicio, alertaBobinaPct, consumoFilmeKg,
+    bobinasExatas, bobinasNecessarias, bobinasTroca, pacotesPorBobina,
+    kgProdutoPorBobina, tempoPorBobinaMin, alertaKgBobina, alertaPacotesRestantes,
+    alertaMinAntes
+  };
+
+  atualizarTela();
+}
+
+function atualizarTela(){
+  document.getElementById("rUnidades").innerHTML = inteiro(dados.unidades);
+  document.getElementById("rGiros").innerHTML = "Giros usados: " + fmt(dados.giros, 1);
+
+  document.getElementById("rCru").innerHTML = fmt(dados.kgCru, 2) + " kg";
+  document.getElementById("rCruDetalhe").innerHTML = fmt(dados.gCru, 2) + " g por unidade crua";
+
+  document.getElementById("rAssado").innerHTML = fmt(dados.kgAssado, 2) + " kg";
+  document.getElementById("rAssadoDetalhe").innerHTML = fmt(dados.gAssado, 2) + " g por unidade assada";
+
+  document.getElementById("rBoa").innerHTML = fmt(dados.kgBom, 2) + " kg";
+  document.getElementById("rBoaDetalhe").innerHTML = "Depois de " + fmt(dados.perdaProc, 1) + "% de quebra/perda";
+
+  document.getElementById("rPPMTotal").innerHTML = fmt(dados.ppmTotalEfetivo, 1);
+  document.getElementById("rPPMDetalhe").innerHTML =
+    dados.maqEmp + " máquinas × " + fmt(dados.ppmMaq,1) + " ppm × " + fmt(dados.eficEmp,0) + "%";
+
+  document.getElementById("rBobinas").innerHTML = inteiro(dados.bobinasNecessarias);
+  document.getElementById("rBobinasDetalhe").innerHTML =
+    "Consumo: " + fmt(dados.consumoFilmeKg,2) + " kg de filme";
+
+  document.getElementById("rCapEmp").innerHTML = inteiro(dados.capacidadePacotes);
+  document.getElementById("rCapEmpDetalhe").innerHTML =
+    dados.gargaloEmp
+    ? "Faltam " + inteiro(Math.abs(dados.saldoPacotes)) + " pacotes de capacidade"
+    : "Sobra capacidade para " + inteiro(dados.saldoPacotes) + " pacotes";
+
+  document.getElementById("rTrocaBobina").innerHTML = dados.bobinasTroca + " troca(s)";
+  document.getElementById("rTrocaDetalhe").innerHTML =
+    "Trocar a cada " + inteiro(dados.pacotesPorBobina) + " pacotes ou " + fmt(dados.kgProdutoPorBobina,1) + " kg embalados";
+
+  let metaClasse = "ok";
+  let metaTexto = "Meta atingida";
+  let metaDetalhe = "Sobra de " + fmt(dados.sobraMeta, 2) + " kg acima da meta.";
+  if(dados.metaKg > 0 && dados.kgBom < dados.metaKg){
+    metaClasse = "warn";
+    metaTexto = "Falta produção";
+    metaDetalhe = "Faltam " + fmt(dados.faltaMeta, 2) + " kg para a meta.";
+  }
+
+  let perdaClasse = "ok";
+  if(dados.perdaFornoPct > 20) perdaClasse = "warn";
+  if(dados.perdaFornoPct > 35) perdaClasse = "bad";
+
+  let capClasse = dados.gargaloEmp ? "bad" : "ok";
+
+  const tabela = `
+    <tr>
+      <td>Biscoitos por giro</td>
+      <td>${inteiro(dados.formas)} unidades</td>
+      <td>Quantidade de formas/cavidades que saem a cada volta do rolo.</td>
+    </tr>
+    <tr>
+      <td>Perda no forno</td>
+      <td><span class="pill ${perdaClasse}">${fmt(dados.perdaFornoKg,2)} kg / ${fmt(dados.perdaFornoPct,1)}%</span></td>
+      <td>Diferença entre peso cru e peso assado. Normalmente representa perda de água/umidade.</td>
+    </tr>
+    <tr>
+      <td>Rendimento do forno</td>
+      <td>${fmt(dados.rendimentoFornoPct,1)}%</td>
+      <td>Quanto do peso cru permaneceu depois do assamento.</td>
+    </tr>
+    <tr>
+      <td>Perda por quebra/processo</td>
+      <td>${fmt(dados.kgQuebra,2)} kg</td>
+      <td>Desconto aplicado depois do forno para representar quebra, refugo ou perda na linha.</td>
+    </tr>
+    <tr>
+      <td>Pacotes produzidos</td>
+      <td>${inteiro(dados.pacotes)} pacotes de ${fmt(dados.pesoPacote,0)} g</td>
+      <td>Peso bom dividido pelo peso de cada pacote.</td>
+    </tr>
+    <tr>
+      <td>Caixas fechadas</td>
+      <td>${inteiro(dados.caixas)} caixas + ${inteiro(dados.pacotesSobra)} pacotes soltos</td>
+      <td>Considerando ${inteiro(dados.pacotesCaixa)} pacotes por caixa.</td>
+    </tr>
+    <tr>
+      <td>Capacidade de empacotamento</td>
+      <td><span class="pill ${capClasse}">${inteiro(dados.capacidadePacotes)} pacotes</span></td>
+      <td>${dados.gargaloEmp ? "As empacotadoras viram gargalo para essa produção." : "As empacotadoras conseguem atender essa produção no tempo informado."}</td>
+    </tr>
+    <tr>
+      <td>Tempo necessário para empacotar</td>
+      <td>${fmt(dados.tempoNecessarioEmp,1)} min</td>
+      <td>Tempo aproximado para embalar todos os pacotes bons.</td>
+    </tr>
+    <tr>
+      <td>Consumo total de bobina</td>
+      <td>${fmt(dados.consumoFilmeKg,2)} kg</td>
+      <td>Filme usado para embalar todos os pacotes calculados.</td>
+    </tr>
+    <tr>
+      <td>Bobinas usadas</td>
+      <td>${inteiro(dados.bobinasNecessarias)} bobina(s)</td>
+      <td>Como cada bobina tem ${fmt(dados.kgBobina,1)} kg, serão necessárias ${fmt(dados.bobinasExatas,2)} bobinas exatas, arredondando para cima.</td>
+    </tr>
+    <tr>
+      <td>Troca de bobina</td>
+      <td>${inteiro(dados.bobinasTroca)} troca(s)</td>
+      <td>Considerando ${inteiro(dados.bobinasInicio)} bobina(s) já montadas nas máquinas no início.</td>
+    </tr>
+    <tr>
+      <td>Quando trocar a bobina</td>
+      <td>${inteiro(dados.pacotesPorBobina)} pacotes</td>
+      <td>Uma bobina de ${fmt(dados.kgBobina,1)} kg embala cerca de ${inteiro(dados.pacotesPorBobina)} pacotes, equivalente a ${fmt(dados.kgProdutoPorBobina,1)} kg de produto.</td>
+    </tr>
+    <tr>
+      <td>Alerta de troca</td>
+      <td>${fmt(dados.alertaKgBobina,2)} kg restantes</td>
+      <td>Com ${fmt(dados.alertaBobinaPct,0)}% de sobra, faltam cerca de ${inteiro(dados.alertaPacotesRestantes)} pacotes ou ${fmt(dados.alertaMinAntes,1)} min por máquina.</td>
+    </tr>
+    <tr>
+      <td>Sobra sem empacotar</td>
+      <td>${fmt(dados.sobraKg,2)} kg</td>
+      <td>Quantidade que sobrou por não completar outro pacote inteiro.</td>
+    </tr>
+    <tr>
+      <td>Meta</td>
+      <td><span class="pill ${metaClasse}">${metaTexto}</span></td>
+      <td>${metaDetalhe} Para essa meta seriam necessários aproximadamente ${fmt(dados.girosParaMeta,1)} giros.</td>
+    </tr>
+  `;
+  document.getElementById("tabela").innerHTML = tabela;
+}
+
+function desenhar(){
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+
+  t += document.getElementById("animar").checked ? 0.035 : 0;
+  ctx.clearRect(0,0,W,H);
+  if(!dados.unidades) calcular();
+
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#fffaf0");
+  grad.addColorStop(1,"#dcecff");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 24px Arial";
+  ctx.fillText("Rolo moldador → esteira → forno → empacotadoras → bobinas", 28, 38);
+
+  ctx.font = "15px Arial";
+  ctx.fillText("Cada giro do rolo libera: " + inteiro(dados.formas) + " biscoitos | Empacotamento: " + fmt(dados.ppmTotalEfetivo,1) + " pacotes/min", 28, 62);
+
+  drawMachine(ctx);
+  drawRoller(ctx, 160, 180, 74);
+  drawConveyor(ctx, 90, 280, 830, 66);
+  drawOven(ctx, 440, 150, 230, 145);
+  drawPackers(ctx, 700, 125, 250, 185);
+  drawScale(ctx, 810, 390);
+  drawBiscuits(ctx);
+  drawPackages(ctx);
+  drawBobbinPanel(ctx, 30, 392, 350, 132);
+  drawFormulaPanel(ctx, 405, 392, 385, 132);
+
+  requestAnimationFrame(desenhar);
+}
+
+function drawMachine(ctx){
+  ctx.save();
+  ctx.fillStyle = "#4a5568";
+  roundRect(ctx, 50, 105, 225, 205, 18, true, false);
+  ctx.fillStyle = "#2d3748";
+  roundRect(ctx, 68, 123, 189, 169, 14, true, false);
+  ctx.fillStyle = "#95a3b8";
+  roundRect(ctx, 85, 140, 155, 35, 10, true, false);
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 15px Arial";
+  ctx.fillText("ROLO MOLDADOR", 93, 164);
+  ctx.fillStyle = "#6b7280";
+  roundRect(ctx, 95, 310, 25, 65, 6, true, false);
+  roundRect(ctx, 225, 310, 25, 65, 6, true, false);
+  ctx.restore();
+}
+
+function drawRoller(ctx, cx, cy, r){
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(t*2.8);
+  const g = ctx.createRadialGradient(-20,-20,10,0,0,r);
+  g.addColorStop(0,"#f7d88c");
+  g.addColorStop(1,"#9a642b");
+  ctx.fillStyle = g;
+  ctx.strokeStyle = "#5c3619";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(0,0,r,0,Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+
+  for(let i=0;i<16;i++){
+    const ang = i*Math.PI*2/16;
+    const rr = r*0.62;
+    const x = Math.cos(ang)*rr;
+    const y = Math.sin(ang)*rr;
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(ang);
+    ctx.fillStyle = "#6f421e";
+    ctx.strokeStyle = "#3b2412";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(0,0,13,8,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.fillStyle = "#3b2412";
+  ctx.beginPath();
+  ctx.arc(0,0,11,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 14px Arial";
+  ctx.fillText("Giros: " + fmt(dados.giros,1), cx-45, cy+r+25);
+}
+
+function drawConveyor(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "#2f3b4d";
+  roundRect(ctx, x, y, w, h, 18, true, false);
+  ctx.fillStyle = "#111827";
+  roundRect(ctx, x+18, y+15, w-36, h-30, 14, true, false);
+  ctx.strokeStyle = "#d1d5db";
+  ctx.lineWidth = 2;
+  for(let i=0;i<22;i++){
+    const xx = x + ((i*55 + (t*90)%55) % w);
+    ctx.beginPath();
+    ctx.moveTo(xx, y+20);
+    ctx.lineTo(xx-25, y+h-20);
+    ctx.stroke();
+  }
+  ctx.fillStyle = "#4b5563";
+  ctx.beginPath();
+  ctx.arc(x+25,y+h/2,25,0,Math.PI*2);
+  ctx.arc(x+w-25,y+h/2,25,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawOven(ctx, x, y, w, h){
+  ctx.save();
+  const g = ctx.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0,"#7c2d12");
+  g.addColorStop(0.5,"#f97316");
+  g.addColorStop(1,"#7c2d12");
+  ctx.fillStyle = g;
+  roundRect(ctx, x, y, w, h, 20, true, false);
+  ctx.fillStyle = "#1f2937";
+  roundRect(ctx, x+25, y+43, w-50, h-72, 12, true, false);
+
+  for(let i=0;i<5;i++){
+    const fx = x+42+i*34;
+    const fy = y+h-24;
+    ctx.fillStyle = i%2===0 ? "#fde047" : "#fb923c";
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.quadraticCurveTo(fx+10, fy-35-Math.sin(t*7+i)*8, fx+20, fy);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "#fff7ed";
+  ctx.font = "bold 18px Arial";
+  ctx.fillText("FORNO", x+82, y+29);
+  ctx.fillStyle = "#ffedd5";
+  ctx.font = "12px Arial";
+  ctx.fillText("Perda: " + fmt(dados.perdaFornoPct,1) + "%", x+75, y+h+21);
+  ctx.restore();
+}
+
+function drawPackers(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "#1e3a5f";
+  roundRect(ctx, x, y, w, h, 18, true, false);
+
+  ctx.fillStyle = "#cfe6ff";
+  ctx.font = "bold 16px Arial";
+  ctx.fillText("EMPACOTADORAS", x+58, y+26);
+
+  const maq = Math.min(4, Math.max(1, dados.maqEmp));
+  const gap = 8;
+  const boxW = (w-30-(maq-1)*gap)/maq;
+  for(let i=0;i<maq;i++){
+    const mx = x+15+i*(boxW+gap);
+    const my = y+48;
+    ctx.fillStyle = "#334155";
+    roundRect(ctx, mx, my, boxW, 105, 10, true, false);
+
+    // bobina
+    ctx.fillStyle = "#e5e7eb";
+    ctx.beginPath();
+    ctx.arc(mx+boxW/2, my+22, 18, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = "#64748b";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = "#94a3b8";
+    ctx.beginPath();
+    ctx.arc(mx+boxW/2, my+22, 6, 0, Math.PI*2);
+    ctx.fill();
+
+    // pacote saindo
+    const move = Math.sin(t*5+i)*3;
+    ctx.fillStyle = "#fbbf24";
+    roundRect(ctx, mx+boxW/2-18, my+62+move, 36, 24, 5, true, false);
+
+    ctx.fillStyle = "#eaf5ff";
+    ctx.font = "bold 11px Arial";
+    ctx.fillText("M" + (i+1), mx+boxW/2-8, my+100);
+  }
+
+  ctx.fillStyle = "#dbeafe";
+  ctx.font = "12px Arial";
+  ctx.fillText("Total: " + dados.maqEmp + " máquina(s)", x+18, y+h-15);
+  ctx.restore();
+}
+
+function drawScale(ctx, x, y){
+  ctx.save();
+  ctx.fillStyle = "#475569";
+  roundRect(ctx, x, y, 150, 70, 14, true, false);
+  ctx.fillStyle = "#0f172a";
+  roundRect(ctx, x+20, y+12, 110, 32, 8, true, false);
+  ctx.fillStyle = "#86efac";
+  ctx.font = "bold 18px Consolas";
+  ctx.fillText(fmt(dados.kgBom,1) + " kg", x+33, y+34);
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 14px Arial";
+  ctx.fillText("PESAGEM FINAL", x+18, y+94);
+  ctx.restore();
+}
+
+function drawBiscuits(ctx){
+  ctx.save();
+  const count = 16;
+  for(let i=0;i<count;i++){
+    let p = ((i/count) + (t*0.18)) % 1;
+    let x = 110 + p*535;
+    let y = 310 + Math.sin(p*Math.PI*4)*5;
+
+    let raw = x < 440;
+    let cooked = x > 605;
+    let color = raw ? "#f1c27d" : "#b77935";
+    if(x >= 440 && x <= 605){
+      const k = (x-440)/(605-440);
+      color = mix("#f1c27d", "#b77935", k);
+    }
+
+    ctx.fillStyle = color;
+    ctx.strokeStyle = cooked ? "#6b3c16" : "#9c6a2f";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(x,y,16,10,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(80,45,15,0.35)";
+    for(let j=0;j<4;j++){
+      const ang = j*Math.PI/2 + t;
+      ctx.beginPath();
+      ctx.arc(x+Math.cos(ang)*6, y+Math.sin(ang)*3, 1.7, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  for(let i=0;i<4;i++){
+    const fall = ((t*1.4+i/4)%1);
+    const x = 185 + Math.sin(i)*22;
+    const y = 225 + fall*55;
+    ctx.fillStyle = "#f1c27d";
+    ctx.strokeStyle = "#9c6a2f";
+    ctx.beginPath();
+    ctx.ellipse(x,y,13,8,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawPackages(ctx){
+  ctx.save();
+  for(let i=0;i<8;i++){
+    const p = ((i/8) + (t*0.28)) % 1;
+    const x = 705 + p*210;
+    const y = 316 + Math.sin(t*4+i)*2;
+    ctx.fillStyle = "#fbbf24";
+    ctx.strokeStyle = "#9a5a00";
+    roundRect(ctx, x, y, 38, 22, 5, true, true);
+    ctx.fillStyle = "#111827";
+    ctx.font = "bold 9px Arial";
+    ctx.fillText("PAC", x+8, y+14);
+  }
+  ctx.restore();
+}
+
+function drawBobbinPanel(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "rgba(8,17,31,.92)";
+  ctx.strokeStyle = "#f0b35b";
+  ctx.lineWidth = 2;
+  roundRect(ctx, x,y,w,h,16,true,true);
+
+  ctx.fillStyle = "#ffe0b5";
+  ctx.font = "bold 17px Arial";
+  ctx.fillText("Resumo bobinas e pacotes/min", x+16, y+27);
+
+  ctx.fillStyle = "#eaf5ff";
+  ctx.font = "14px Arial";
+  const linhas = [
+    "Pacotes: " + inteiro(dados.pacotes),
+    "Pacotes/min total: " + fmt(dados.ppmTotalEfetivo,1),
+    "Bobinas: " + inteiro(dados.bobinasNecessarias) + " | Trocas: " + inteiro(dados.bobinasTroca),
+    "Trocar a cada: " + inteiro(dados.pacotesPorBobina) + " pacotes"
+  ];
+  linhas.forEach((l,i)=>ctx.fillText(l, x+16, y+55+i*19));
+  ctx.restore();
+}
+
+function drawFormulaPanel(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "rgba(8,17,31,.92)";
+  ctx.strokeStyle = "#7db8ff";
+  ctx.lineWidth = 2;
+  roundRect(ctx, x,y,w,h,16,true,true);
+
+  ctx.fillStyle = "#cfe6ff";
+  ctx.font = "bold 17px Arial";
+  ctx.fillText("Cálculo usado", x+16, y+27);
+
+  ctx.fillStyle = "#ffdf93";
+  ctx.font = "13px Consolas";
+  ctx.fillText("unid = formas × giros", x+16, y+55);
+  ctx.fillText("ppm total = máquinas × ppm × eficiência", x+16, y+77);
+  ctx.fillText("filme kg = pacotes × g filme / 1000", x+16, y+99);
+  ctx.fillText("bobinas = filme kg / kg bobina", x+16, y+121);
+  ctx.restore();
+}
+
+function valorTexto(id){
+  const el = document.getElementById(id);
+  if(!el) return "";
+  return (el.value || "").trim();
+}
+
+function agoraFormatado(){
+  const data = new Date();
+  return data.toLocaleString("pt-BR");
+}
+
+function atualizarRelatorio(){
+  calcular();
+
+  document.getElementById("repData").innerHTML = "Data de emissão: " + agoraFormatado();
+  document.getElementById("repProduto").innerHTML = valorTexto("produto") || "Biscoito";
+  document.getElementById("repLote").innerHTML = valorTexto("lote") || "-";
+  document.getElementById("repOperador").innerHTML = valorTexto("operador") || "-";
+  document.getElementById("repTurno").innerHTML = valorTexto("turno") || "-";
+
+  document.getElementById("repUnidades").innerHTML = inteiro(dados.unidades);
+  document.getElementById("repGiros").innerHTML = fmt(dados.giros, 2);
+  document.getElementById("repCru").innerHTML = fmt(dados.kgCru, 2) + " kg";
+  document.getElementById("repAssado").innerHTML = fmt(dados.kgAssado, 2) + " kg";
+  document.getElementById("repBoa").innerHTML = fmt(dados.kgBom, 2) + " kg";
+  document.getElementById("repPacotes").innerHTML = inteiro(dados.pacotes) + " pacotes";
+  document.getElementById("repPPM").innerHTML = fmt(dados.ppmTotalEfetivo, 1);
+  document.getElementById("repBobinas").innerHTML = inteiro(dados.bobinasNecessarias);
+
+  const modoTexto = dados.modo === "rpm" ? "RPM × tempo" : "Giros totais informados";
+
+  const tabela = `
+    <tr><td>Modo de cálculo</td><td>${modoTexto}</td><td>${dados.modo === "rpm" ? "RPM: " + fmt(dados.rpm,2) + " | Tempo: " + fmt(dados.tempoMin,2) + " min" : "Giros informados: " + fmt(dados.giros,2)}</td></tr>
+    <tr><td>Total de formas no rolo</td><td>${inteiro(dados.formas)} formas</td><td>Cada giro completo gera ${inteiro(dados.formas)} biscoitos.</td></tr>
+    <tr><td>Peso unitário cru</td><td>${fmt(dados.gCru,2)} g</td><td>Base para cálculo do peso total cru.</td></tr>
+    <tr><td>Peso unitário assado</td><td>${fmt(dados.gAssado,2)} g</td><td>Base para cálculo do peso total assado.</td></tr>
+    <tr><td>Perda no forno</td><td>${fmt(dados.perdaFornoKg,2)} kg</td><td>${fmt(dados.perdaFornoPct,1)}% de diferença entre cru e assado.</td></tr>
+    <tr><td>Rendimento do forno</td><td>${fmt(dados.rendimentoFornoPct,1)}%</td><td>Percentual do peso cru que permaneceu após assar.</td></tr>
+    <tr><td>Perda/quebra do processo</td><td>${fmt(dados.perdaProc,1)}%</td><td>Desconto aplicado no peso assado: ${fmt(dados.kgQuebra,2)} kg.</td></tr>
+    <tr><td>Peso por pacote</td><td>${fmt(dados.pesoPacote,0)} g</td><td>Gerou ${inteiro(dados.pacotes)} pacotes e sobra de ${fmt(dados.sobraKg,2)} kg.</td></tr>
+    <tr><td>Empacotadoras</td><td>${inteiro(dados.maqEmp)} máquina(s)</td><td>${fmt(dados.ppmMaq,1)} pacotes/min por máquina, eficiência ${fmt(dados.eficEmp,0)}%.</td></tr>
+    <tr><td>Pacotes por minuto total</td><td>${fmt(dados.ppmTotalEfetivo,1)} ppm</td><td>Capacidade no tempo informado: ${inteiro(dados.capacidadePacotes)} pacotes.</td></tr>
+    <tr><td>Tempo necessário para empacotar</td><td>${fmt(dados.tempoNecessarioEmp,1)} min</td><td>${dados.gargaloEmp ? "Empacotamento com gargalo." : "Capacidade atende a produção."}</td></tr>
+    <tr><td>Consumo total de bobina</td><td>${fmt(dados.consumoFilmeKg,2)} kg</td><td>${fmt(dados.gBobinaPacote,2)} g de bobina por pacote.</td></tr>
+    <tr><td>Bobinas necessárias</td><td>${inteiro(dados.bobinasNecessarias)}</td><td>${fmt(dados.bobinasExatas,2)} bobinas exatas, arredondadas para cima.</td></tr>
+    <tr><td>Trocas de bobina</td><td>${inteiro(dados.bobinasTroca)}</td><td>Considerando ${inteiro(dados.bobinasInicio)} bobina(s) montadas no início.</td></tr>
+    <tr><td>Quando trocar</td><td>${inteiro(dados.pacotesPorBobina)} pacotes</td><td>Equivale a ${fmt(dados.kgProdutoPorBobina,1)} kg de produto embalado por bobina.</td></tr>
+    <tr><td>Alerta de troca</td><td>${fmt(dados.alertaKgBobina,2)} kg restantes</td><td>Alertar ${fmt(dados.alertaMinAntes,1)} min antes por máquina, aproximadamente.</td></tr>
+    <tr><td>Pacotes por caixa</td><td>${inteiro(dados.pacotesCaixa)}</td><td>${inteiro(dados.caixas)} caixas fechadas + ${inteiro(dados.pacotesSobra)} pacotes soltos.</td></tr>
+    <tr><td>Meta informada</td><td>${fmt(dados.metaKg,2)} kg</td><td>${dados.kgBom >= dados.metaKg ? "Meta atingida com sobra de " + fmt(dados.sobraMeta,2) + " kg." : "Faltam " + fmt(dados.faltaMeta,2) + " kg."}</td></tr>
+  `;
+
+  document.getElementById("repTabela").innerHTML = tabela;
+}
+
+function imprimirRelatorio(){
+  atualizarRelatorio();
+  setTimeout(() => {
+    window.print();
+  }, 200);
+}
+
+function exemploPequeno(){
+  document.getElementById("produto").value = "Biscoito linha pequena";
+  document.getElementById("lote").value = "OP-PEQ-001";
+  document.getElementById("turno").value = "1º Turno";
+  document.getElementById("modoGiro").value = "total";
+  trocarModo();
+  document.getElementById("formas").value = 60;
+  document.getElementById("giros").value = 80;
+  document.getElementById("gCru").value = 7.8;
+  document.getElementById("gAssado").value = 6.6;
+  document.getElementById("perdaProc").value = 1.5;
+  document.getElementById("pesoPacote").value = 300;
+  document.getElementById("pacotesCaixa").value = 20;
+  document.getElementById("metaKg").value = 30;
+  document.getElementById("maqEmp").value = 2;
+  document.getElementById("ppmMaq").value = 38;
+  document.getElementById("tempoEmpMin").value = 45;
+  document.getElementById("eficEmp").value = 85;
+  document.getElementById("kgBobina").value = 12;
+  document.getElementById("gBobinaPacote").value = 2.5;
+  document.getElementById("bobinasInicio").value = 2;
+  calcular();
+}
+
+function exemploIndustrial(){
+  document.getElementById("produto").value = "Biscoito industrial";
+  document.getElementById("lote").value = "OP-IND-001";
+  document.getElementById("turno").value = "2º Turno";
+  document.getElementById("modoGiro").value = "rpm";
+  trocarModo();
+  document.getElementById("formas").value = 96;
+  document.getElementById("rpm").value = 32;
+  document.getElementById("tempoMin").value = 60;
+  document.getElementById("gCru").value = 9.2;
+  document.getElementById("gAssado").value = 7.5;
+  document.getElementById("perdaProc").value = 2.5;
+  document.getElementById("pesoPacote").value = 350;
+  document.getElementById("pacotesCaixa").value = 24;
+  document.getElementById("metaKg").value = 1300;
+  document.getElementById("maqEmp").value = 4;
+  document.getElementById("ppmMaq").value = 55;
+  document.getElementById("tempoEmpMin").value = 60;
+  document.getElementById("eficEmp").value = 88;
+  document.getElementById("kgBobina").value = 18;
+  document.getElementById("gBobinaPacote").value = 3.1;
+  document.getElementById("bobinasInicio").value = 4;
+  calcular();
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+
+function mix(c1,c2,p){
+  const a = hexToRgb(c1);
+  const b = hexToRgb(c2);
+  const r = Math.round(a.r + (b.r-a.r)*p);
+  const g = Math.round(a.g + (b.g-a.g)*p);
+  const bl = Math.round(a.b + (b.b-a.b)*p);
+  return `rgb(${r},${g},${bl})`;
+}
+
+function hexToRgb(hex){
+  const v = parseInt(hex.replace("#",""),16);
+  return {r:v>>16, g:(v>>8)&255, b:v&255};
+}
+
+document.querySelectorAll("input,select").forEach(el=>{
+  el.addEventListener("input", calcular);
+  el.addEventListener("change", calcular);
+});
+
+trocarModo();
+calcular();
+desenhar();
+</script>
+
+</body>
+</html>

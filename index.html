@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Portal Processos & Engenharia 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#020617;
+  --panel:rgba(15,23,42,.72);
+  --line:rgba(148,163,184,.24);
+  --text:#f8fafc;
+  --muted:#b9c8dc;
+  --cyan:#38bdf8;
+  --amber:#f59e0b;
+  --green:#34d399;
+  --red:#fb7185;
+  --shadow:0 26px 80px rgba(0,0,0,.42);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%,rgba(56,189,248,.22),transparent 34%),
+    radial-gradient(circle at 90% 15%,rgba(245,158,11,.18),transparent 32%),
+    radial-gradient(circle at 50% 100%,rgba(52,211,153,.12),transparent 38%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;pointer-events:none;opacity:.16;
+  background-image:
+    linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+  background-size:45px 45px;
+  mask-image:linear-gradient(to bottom,#000,transparent 78%);
+}
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(2,6,23,.72);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{
+  max-width:1240px;margin:auto;padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.brand{
+  display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;min-width:max-content;
+}
+.logo{
+  width:43px;height:43px;border-radius:16px;
+  display:grid;place-items:center;
+  color:#04111f;font-weight:1000;
+  background:linear-gradient(135deg,var(--cyan),var(--amber));
+  box-shadow:0 0 34px rgba(56,189,248,.38);
+}
+.brand b{display:block;font-size:15px;line-height:1.1}
+.brand small{display:block;color:var(--muted);font-weight:700;margin-top:3px;font-size:11px}
+.menu{display:flex;align-items:center;gap:8px}
+.menu-item{position:relative}
+.menu-link,.mobile-btn{
+  border:1px solid rgba(148,163,184,.22);
+  background:rgba(15,23,42,.54);
+  color:#eaf6ff;text-decoration:none;
+  padding:10px 13px;border-radius:14px;
+  font-size:14px;font-weight:800;cursor:pointer;
+}
+.menu-link:hover,.mobile-btn:hover{
+  border-color:rgba(56,189,248,.75);
+  box-shadow:0 0 22px rgba(56,189,248,.13);
+}
+.dropdown{
+  display:none;position:absolute;right:0;top:44px;min-width:270px;
+  background:rgba(15,23,42,.96);backdrop-filter:blur(20px);
+  border:1px solid rgba(148,163,184,.28);
+  border-radius:18px;padding:10px;box-shadow:var(--shadow);
+}
+.dropdown a{
+  display:block;color:#dbeafe;text-decoration:none;padding:12px 12px;border-radius:12px;
+  font-weight:750;font-size:14px;border:1px solid transparent;
+}
+.dropdown a:hover{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.26);color:#fff}
+.menu-item:hover .dropdown{display:block}
+.mobile-btn{display:none}
+.mobile-panel{display:none}
+.hero{
+  max-width:1240px;margin:0 auto;padding:60px 18px 26px;
+  display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;
+}
+.kicker{
+  display:inline-flex;gap:9px;align-items:center;
+  border:1px solid rgba(56,189,248,.38);
+  background:rgba(56,189,248,.10);
+  border-radius:999px;padding:8px 12px;color:#cffafe;font-weight:900;font-size:13px;
+}
+h1{
+  font-size:clamp(34px,6vw,72px);
+  line-height:.96;margin:16px 0 14px;letter-spacing:-2px;
+}
+.gradient-text{
+  background:linear-gradient(135deg,#fff 10%,#7dd3fc 45%,#fed7aa 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{color:#cbd5e1;font-size:18px;line-height:1.65;max-width:780px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  padding:14px 18px;border-radius:16px;font-weight:1000;
+  border:1px solid rgba(148,163,184,.24);color:#fff;
+}
+.btn.primary{background:linear-gradient(135deg,#0284c7,#f59e0b);box-shadow:0 18px 45px rgba(2,132,199,.22)}
+.btn.ghost{background:rgba(15,23,42,.6)}
+.dashboard{
+  position:relative;
+  border:1px solid rgba(148,163,184,.22);
+  background:linear-gradient(180deg,rgba(15,23,42,.72),rgba(15,23,42,.42));
+  border-radius:30px;padding:18px;box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.dashboard::before{
+  content:"";position:absolute;inset:-80px;background:conic-gradient(from 130deg,transparent,#38bdf8,transparent,#f59e0b,transparent);
+  opacity:.16;animation:spin 8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dash-inner{position:relative;background:rgba(2,6,23,.82);border:1px solid rgba(148,163,184,.17);border-radius:24px;padding:18px}
+.status-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.status{
+  min-height:110px;border-radius:18px;padding:14px;background:rgba(15,23,42,.88);
+  border:1px solid rgba(148,163,184,.20);
+}
+.status span{display:block;color:#9fb4cf;font-size:12px;font-weight:900;text-transform:uppercase}
+.status b{display:block;font-size:30px;margin-top:10px}
+.bar{height:9px;border-radius:999px;background:#0f172a;overflow:hidden;margin-top:12px}
+.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--green),var(--amber));animation:pulsebar 2.4s ease-in-out infinite alternate}
+@keyframes pulsebar{from{width:58%}to{width:96%}}
+.section{
+  max-width:1240px;margin:0 auto;padding:28px 18px;
+}
+.section-head{
+  display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:16px;
+}
+.section h2{font-size:30px;margin:0}
+.section p{color:#b9c8dc;line-height:1.55}
+.search-box{
+  display:flex;gap:10px;align-items:center;
+  min-width:min(390px,100%);
+  border:1px solid rgba(148,163,184,.26);
+  background:rgba(15,23,42,.58);
+  border-radius:18px;padding:10px 12px;
+}
+.search-box input{
+  width:100%;border:none;outline:none;background:transparent;color:#fff;font-size:15px;
+}
+.grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+}
+.app-card{
+  position:relative;overflow:hidden;
+  border:1px solid rgba(148,163,184,.23);
+  background:linear-gradient(180deg,rgba(15,23,42,.78),rgba(15,23,42,.46));
+  border-radius:24px;padding:18px;min-height:260px;
+  box-shadow:0 20px 55px rgba(0,0,0,.24);
+}
+.app-card:hover{transform:translateY(-4px);border-color:rgba(56,189,248,.58);transition:.18s ease}
+.card-glow{
+  position:absolute;inset:auto -40px -70px auto;width:180px;height:180px;border-radius:999px;
+  background:rgba(56,189,248,.18);filter:blur(18px);
+}
+.card-top{display:flex;justify-content:space-between;align-items:center;position:relative}
+.app-icon{
+  width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:25px;
+  background:rgba(2,6,23,.82);border:1px solid rgba(148,163,184,.24);
+}
+.tag{
+  color:#08111f;background:linear-gradient(135deg,#7dd3fc,#fdba74);
+  border-radius:999px;font-weight:1000;font-size:11px;padding:7px 9px;
+}
+.app-card h3{position:relative;font-size:22px;margin:18px 0 8px}
+.app-card p{position:relative;color:#b9c8dc;line-height:1.55;min-height:70px}
+.open-btn{
+  position:absolute;left:18px;right:18px;bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+  color:#fff;text-decoration:none;font-weight:1000;
+  padding:13px 14px;border-radius:15px;
+  background:rgba(2,6,23,.72);border:1px solid rgba(148,163,184,.24);
+}
+.open-btn:hover{background:linear-gradient(135deg,#0369a1,#c2410c);border-color:transparent}
+.quick{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;
+}
+.quick a{
+  min-height:95px;padding:14px;border-radius:20px;border:1px solid rgba(148,163,184,.22);
+  background:rgba(15,23,42,.55);color:#e2e8f0;text-decoration:none;font-weight:900;
+}
+.quick a span{display:block;color:#94a3b8;font-size:12px;font-weight:700;margin-top:7px}
+.footer{
+  max-width:1240px;margin:20px auto 0;padding:25px 18px 45px;color:#94a3b8;text-align:center;
+}
+@media(max-width:980px){
+  .hero{grid-template-columns:1fr;padding-top:34px}
+  .grid{grid-template-columns:1fr 1fr}
+  .quick{grid-template-columns:1fr 1fr}
+  .section-head{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:760px){
+  .menu{display:none}
+  .mobile-btn{display:inline-flex}
+  .nav-inner{align-items:center}
+  .mobile-panel.open{
+    display:grid;gap:8px;padding:0 18px 14px;max-width:1240px;margin:auto;
+  }
+  .mobile-panel a{
+    color:#dbeafe;text-decoration:none;font-weight:850;
+    padding:12px;border-radius:14px;border:1px solid rgba(148,163,184,.22);
+    background:rgba(15,23,42,.62);
+  }
+  .grid{grid-template-columns:1fr}
+  .quick{grid-template-columns:1fr}
+  .status-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <span class="logo">RV</span>
+      <span><b>Portal Processos & Engenharia</b><small>Menu 2026 • HTML, CSS e JS</small></span>
+    </a>
+
+    <div class="menu">
+      <a class="menu-link" href="#entrada">Entrada</a>
+      <div class="menu-item">
+        <button class="menu-link">Processos ▾</button>
+        <div class="dropdown">
+          <a href="processos_linha_biscoitos_v1.html">Linha de Biscoitos V1</a>
+<a href="processos_linha_biscoitos_v2.html">Linha de Biscoitos V2</a>
+<a href="processos_linha_biscoitos_v3.html">Linha de Biscoitos V3</a>
+<a href="processos_empacotadoras_bobinas.html">Empacotadoras e Bobinas</a>
+<a href="processos_peso_rolo_formas.html">Peso por Rolo e Formas</a>
+        </div>
+      </div>
+      <div class="menu-item">
+        <button class="menu-link">Engenharia ▾</button>
+        <div class="dropdown">
+          <a href="engenharia_caixas_pallet.html">Engenharia de Caixas no Pallet</a>
+        </div>
+      </div>
+      <a class="menu-link" href="#todos">Todos os sistemas</a>
+    </div>
+
+    <button class="mobile-btn" onclick="toggleMenu()">☰ Menu</button>
+  </div>
+  <div id="mobilePanel" class="mobile-panel">
+    <a href="#entrada">🏠 Entrada</a>
+    <a href="processos_linha_biscoitos_v1.html">🍪 Linha de Biscoitos</a>
+    <a href="processos_empacotadoras_bobinas.html">📦 Empacotadoras e Bobinas</a>
+    <a href="processos_peso_rolo_formas.html">⚖️ Peso por Rolo</a>
+    <a href="engenharia_caixas_pallet.html">🏗️ Engenharia Pallet</a>
+    <a href="#todos">🔗 Todos os links</a>
+  </div>
+</nav>
+
+<header id="entrada" class="hero">
+  <section>
+    <span class="kicker">⚙️ Entrada principal com submenus linkados</span>
+    <h1><span class="gradient-text">Processos Industriais</span><br>e Engenharia 2026</h1>
+    <p>Portal moderno para acessar seus simuladores de linha de biscoitos, produção, empacotadoras, bobinas, peso por rolo e engenharia de resistência de caixas no pallet.</p>
+    <div class="actions">
+      <a class="btn primary" href="#todos">Abrir sistemas</a>
+      <a class="btn ghost" href="processos_linha_biscoitos_v1.html">Começar pela linha de processo</a>
+    </div>
+  </section>
+
+  <aside class="dashboard">
+    <div class="dash-inner">
+      <div class="status-row">
+        <div class="status"><span>Páginas linkadas</span><b>6</b><div class="bar"><div class="fill"></div></div></div>
+        <div class="status"><span>Menus</span><b>2</b><div class="bar"><div class="fill"></div></div></div>
+        <div class="status"><span>Área</span><b>Processos</b><div class="bar"><div class="fill"></div></div></div>
+        <div class="status"><span>Área</span><b>Engenharia</b><div class="bar"><div class="fill"></div></div></div>
+      </div>
+    </div>
+  </aside>
+</header>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <h2>Acesso rápido</h2>
+      <p>Atalhos principais para entrar direto nas partes mais usadas.</p>
+    </div>
+  </div>
+  <div class="quick">
+    <a href="processos_linha_biscoitos_v1.html">🍪 Processo de Biscoitos<span>Forno, resfriamento, batelada e recheado</span></a>
+    <a href="processos_empacotadoras_bobinas.html">📦 Empacotadoras<span>Pacotes/min, máquinas e bobinas</span></a>
+    <a href="processos_peso_rolo_formas.html">⚖️ Peso por Rolo<span>Giros, formas, peso cru e assado</span></a>
+    <a href="engenharia_caixas_pallet.html">🏗️ Engenharia Pallet<span>Sobrecarga, flambagem e resistência</span></a>
+  </div>
+</section>
+
+<section id="todos" class="section">
+  <div class="section-head">
+    <div>
+      <h2>Todos os sistemas linkados</h2>
+      <p>Use a busca para localizar rápido por processo, produção, bobina, pallet ou engenharia.</p>
+    </div>
+    <label class="search-box">🔎 <input id="search" type="search" placeholder="Pesquisar sistema..." oninput="filterCards()"></label>
+  </div>
+
+  <div id="cards" class="grid">
+    
+      <article class="app-card" data-filter="processos linha de biscoitos v1 produção total, biscoito recheado, forno, resfriamento, batelada e massa.">
+        <div class="card-glow"></div>
+        <div class="card-top">
+          <span class="app-icon">🍪</span>
+          <span class="tag">PROCESSOS</span>
+        </div>
+        <h3>Linha de Biscoitos V1</h3>
+        <p>Produção total, biscoito recheado, forno, resfriamento, batelada e massa.</p>
+        <a class="open-btn" href="processos_linha_biscoitos_v1.html">Abrir página <span>→</span></a>
+      </article>
+    
+
+      <article class="app-card" data-filter="processos linha de biscoitos v2 segunda versão do simulador de processo de biscoitos.">
+        <div class="card-glow"></div>
+        <div class="card-top">
+          <span class="app-icon">🍪</span>
+          <span class="tag">PROCESSOS</span>
+        </div>
+        <h3>Linha de Biscoitos V2</h3>
+        <p>Segunda versão do simulador de processo de biscoitos.</p>
+        <a class="open-btn" href="processos_linha_biscoitos_v2.html">Abrir página <span>→</span></a>
+      </article>
+    
+
+      <article class="app-card" data-filter="processos linha de biscoitos v3 terceira versão do simulador de linha de processo.">
+        <div class="card-glow"></div>
+        <div class="card-top">
+          <span class="app-icon">🍪</span>
+          <span class="tag">PROCESSOS</span>
+        </div>
+        <h3>Linha de Biscoitos V3</h3>
+        <p>Terceira versão do simulador de linha de processo.</p>
+        <a class="open-btn" href="processos_linha_biscoitos_v3.html">Abrir página <span>→</span></a>
+      </article>
+    
+
+      <article class="app-card" data-filter="processos empacotadoras e bobinas pacotes por minuto, máquinas empacotadoras, bobinas e relatório.">
+        <div class="card-glow"></div>
+        <div class="card-top">
+          <span class="app-icon">📦</span>
+          <span class="tag">PROCESSOS</span>
+        </div>
+        <h3>Empacotadoras e Bobinas</h3>
+        <p>Pacotes por minuto, máquinas empacotadoras, bobinas e relatório.</p>
+        <a class="open-btn" href="processos_empacotadoras_bobinas.html">Abrir página <span>→</span></a>
+      </article>
+    
+
+      <article class="app-card" data-filter="processos peso por rolo e formas cálculo por formas do rolo, giros, peso cru e peso assado.">
+        <div class="card-glow"></div>
+        <div class="card-top">
+          <span class="app-icon">⚖️</span>
+          <span class="tag">PROCESSOS</span>
+        </div>
+        <h3>Peso por Rolo e Formas</h3>
+        <p>Cálculo por formas do rolo, giros, peso cru e peso assado.</p>
+        <a class="open-btn" href="processos_peso_rolo_formas.html">Abrir página <span>→</span></a>
+      </article>
+    
+
+      <article class="app-card" data-filter="engenharia engenharia de caixas no pallet sobrecarga, flambagem, resistência e risco no empilhamento.">
+        <div class="card-glow"></div>
+        <div class="card-top">
+          <span class="app-icon">🏗️</span>
+          <span class="tag">ENGENHARIA</span>
+        </div>
+        <h3>Engenharia de Caixas no Pallet</h3>
+        <p>Sobrecarga, flambagem, resistência e risco no empilhamento.</p>
+        <a class="open-btn" href="engenharia_caixas_pallet.html">Abrir página <span>→</span></a>
+      </article>
+    
+  </div>
+</section>
+
+<footer class="footer">
+  Portal Processos & Engenharia 2026 • Professor Renato • Arquivos HTML linkados em menu moderno com submenus.
+</footer>
+
+<script>
+function toggleMenu(){
+  document.getElementById('mobilePanel').classList.toggle('open');
+}
+function filterCards(){
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  document.querySelectorAll('.app-card').forEach(card => {
+    card.style.display = card.dataset.filter.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

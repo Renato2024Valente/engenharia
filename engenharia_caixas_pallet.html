@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Simulador de Sobrecarga, Flambagem e Resistência de Caixas no Pallet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#07111f;
+    color:#eef5ff;
+  }
+  header{
+    padding:22px 16px;
+    text-align:center;
+    background:linear-gradient(135deg,#0b1d36,#123b68,#07111f);
+    border-bottom:2px solid #4aa3ff;
+  }
+  header h1{margin:0;font-size:27px}
+  header p{margin:8px 0 0;color:#c9e2ff}
+  main{max-width:1350px;margin:auto;padding:16px}
+  .layout{
+    display:grid;
+    grid-template-columns:390px 1fr;
+    gap:16px;
+  }
+  .card{
+    background:#101b2d;
+    border:1px solid #244563;
+    border-radius:16px;
+    padding:15px;
+    box-shadow:0 0 22px rgba(0,0,0,.25);
+  }
+  h2{
+    margin:0 0 12px;
+    font-size:20px;
+    color:#8bd0ff;
+  }
+  h3{
+    margin:16px 0 8px;
+    font-size:16px;
+    color:#d9efff;
+  }
+  label{
+    display:block;
+    margin-top:9px;
+    margin-bottom:4px;
+    font-weight:bold;
+    color:#dbeeff;
+    font-size:14px;
+  }
+  input,select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #35577d;
+    background:#07111f;
+    color:white;
+    font-size:15px;
+    outline:none;
+  }
+  input:focus,select:focus{border-color:#66c2ff}
+  button{
+    width:100%;
+    border:none;
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+    background:#2388ff;
+    color:#fff;
+    font-weight:bold;
+    font-size:15px;
+    cursor:pointer;
+  }
+  button:hover{background:#4aa3ff}
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .resultGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .metric{
+    background:#07111f;
+    border:1px solid #284461;
+    border-radius:14px;
+    padding:12px;
+    min-height:88px;
+  }
+  .metric .title{
+    color:#a9c8e8;
+    font-size:13px;
+    margin-bottom:8px;
+  }
+  .metric .value{
+    font-size:23px;
+    font-weight:bold;
+    color:#fff;
+  }
+  .metric .small{
+    font-size:12px;
+    color:#b8d3ee;
+    margin-top:5px;
+  }
+  .ok{color:#7dffb2!important}
+  .warn{color:#ffe66d!important}
+  .bad{color:#ff7474!important}
+  #canvasBox{
+    width:100%;
+    height:560px;
+    background:linear-gradient(#f9fbff,#dcecff);
+    border-radius:16px;
+    border:1px solid #7faed4;
+    display:block;
+  }
+  .explain{
+    background:#081525;
+    border-left:5px solid #48a6ff;
+    border-radius:10px;
+    padding:12px;
+    line-height:1.5;
+    color:#dbeeff;
+    margin-top:12px;
+  }
+  .formula{
+    background:#07111f;
+    border:1px solid #263f5d;
+    color:#ffe28a;
+    padding:8px;
+    border-radius:8px;
+    font-family:Consolas,monospace;
+    margin-top:6px;
+    overflow:auto;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    overflow:hidden;
+    border-radius:10px;
+    font-size:14px;
+  }
+  th,td{
+    padding:9px;
+    border-bottom:1px solid #284461;
+    text-align:left;
+  }
+  th{background:#0b233a;color:#bfe6ff}
+  td{background:#081525}
+  .pill{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:999px;
+    font-weight:bold;
+    color:#06111f;
+  }
+  .pill.ok{background:#7dffb2;color:#06111f!important}
+  .pill.warn{background:#ffe66d;color:#06111f!important}
+  .pill.bad{background:#ff7474;color:#06111f!important}
+  .mini{
+    font-size:12px;
+    color:#adc7e0;
+  }
+  .switchLine{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+    color:#cfe7ff;
+    font-size:14px;
+  }
+  .switchLine input{width:auto}
+  footer{
+    padding:18px;
+    text-align:center;
+    color:#9fb8cf;
+  }
+  @media(max-width:980px){
+    .layout{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr 1fr}
+    #canvasBox{height:460px}
+  }
+  @media(max-width:560px){
+    .row{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr}
+    header h1{font-size:22px}
+  }
+</style>
+
+<style>
+  .rvmini-menu{
+    position:sticky;top:0;z-index:99999;
+    background:rgba(2,8,23,.88);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid rgba(125,211,252,.28);
+    box-shadow:0 12px 35px rgba(0,0,0,.28);
+    font-family:Arial,Helvetica,sans-serif;
+  }
+  .rvmini-wrap{max-width:1500px;margin:auto;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .rvmini-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:900;letter-spacing:.2px}
+  .rvmini-badge{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#f59e0b);display:grid;place-items:center;color:#06111f;box-shadow:0 0 22px rgba(56,189,248,.45)}
+  .rvmini-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .rvmini-links a{color:#dbeafe;text-decoration:none;font-weight:700;font-size:13px;padding:9px 11px;border:1px solid rgba(148,163,184,.18);border-radius:12px;background:rgba(15,23,42,.55)}
+  .rvmini-links a:hover{border-color:#38bdf8;color:#fff;background:rgba(56,189,248,.14)}
+  @media(max-width:740px){
+    .rvmini-wrap{align-items:flex-start;flex-direction:column}
+    .rvmini-links{width:100%;display:grid;grid-template-columns:1fr 1fr}
+    .rvmini-links a{text-align:center}
+  }
+</style>
+
+</head>
+<body>
+
+<nav class="rvmini-menu">
+  <div class="rvmini-wrap">
+    <a class="rvmini-brand" href="index.html"><span class="rvmini-badge">RV</span><span>Portal Processos & Engenharia 2026</span></a>
+    <div class="rvmini-links">
+      <a href="index.html">🏠 Entrada</a>
+      <a href="processos_linha_biscoitos_v1.html">🍪 Linha Biscoitos</a>
+      <a href="processos_empacotadoras_bobinas.html">📦 Empacotadoras</a>
+      <a href="engenharia_caixas_pallet.html">🏗️ Engenharia</a>
+    </div>
+  </div>
+</nav>
+
+
+<header>
+  <h1>Simulador de Caixas sobre Pallet</h1>
+  <p>Sobrecarga, pressão, deformação, flambagem do papelão e risco para o produto interno</p>
+</header>
+
+<main>
+  <div class="layout">
+
+    <section class="card">
+      <h2>Dados do empilhamento</h2>
+
+      <div class="row">
+        <div>
+          <label>Caixas por camada</label>
+          <input id="caixasCamada" type="number" min="1" value="12">
+        </div>
+        <div>
+          <label>Número de camadas</label>
+          <input id="camadas" type="number" min="1" value="5">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Peso de cada caixa cheia (kg)</label>
+          <input id="pesoCaixa" type="number" step="0.1" min="0.1" value="20">
+        </div>
+        <div>
+          <label>Fator de segurança</label>
+          <input id="fs" type="number" step="0.1" min="1" value="2">
+        </div>
+      </div>
+
+      <h3>Dimensões da caixa</h3>
+
+      <div class="row">
+        <div>
+          <label>Comprimento (cm)</label>
+          <input id="comp" type="number" step="0.1" min="1" value="40">
+        </div>
+        <div>
+          <label>Largura (cm)</label>
+          <input id="larg" type="number" step="0.1" min="1" value="30">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Altura (cm)</label>
+          <input id="alt" type="number" step="0.1" min="1" value="25">
+        </div>
+        <div>
+          <label>Espessura papelão (mm)</label>
+          <input id="esp" type="number" step="0.1" min="0.1" value="4">
+        </div>
+      </div>
+
+      <h3>Resistência da embalagem</h3>
+
+      <label>Resistência da caixa à compressão vertical - BCT (kgf)</label>
+      <input id="bct" type="number" step="1" min="1" value="180">
+
+      <label>Condição do empilhamento</label>
+      <select id="condicao">
+        <option value="1">Boa: caixas alinhadas e secas</option>
+        <option value="0.85">Média: amarração/desalinhamento pequeno</option>
+        <option value="0.70">Ruim: desalinhamento ou transporte com vibração</option>
+        <option value="0.55">Crítica: papelão úmido ou empilhamento ruim</option>
+      </select>
+
+      <h3>Proteção do produto interno</h3>
+
+      <div class="row">
+        <div>
+          <label>Folga interna/proteção (mm)</label>
+          <input id="folga" type="number" step="0.1" min="0" value="8">
+        </div>
+        <div>
+          <label>Produto resiste até (kgf)</label>
+          <input id="resProduto" type="number" step="1" min="0" value="60">
+        </div>
+      </div>
+
+      <label class="switchLine">
+        <input id="mostrarForcas" type="checkbox" checked>
+        Mostrar setas de força e flambagem animada
+      </label>
+
+      <button onclick="calcular()">Calcular e Animar</button>
+
+      <button onclick="exemploLeve()">Exemplo seguro</button>
+      <button onclick="exemploRisco()">Exemplo com risco</button>
+
+      <div class="explain">
+        Este simulador é didático. Para projeto real, use ensaio de compressão da caixa, dados do fornecedor, umidade, tempo de armazenagem, vibração e fator de segurança.
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>Desenho animado do pallet</h2>
+        <canvas id="canvasBox" width="1000" height="560"></canvas>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>Resultados principais</h2>
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Peso total no pallet</div>
+            <div id="rPesoTotal" class="value">--</div>
+            <div id="rPesoTotalN" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Carga na caixa inferior</div>
+            <div id="rCargaInferior" class="value">--</div>
+            <div id="rSobrecarga" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Resistência efetiva</div>
+            <div id="rBctEfetivo" class="value">--</div>
+            <div id="rNecessario" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Situação</div>
+            <div id="rSituacao" class="value">--</div>
+            <div id="rMargem" class="small">--</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item analisado</th>
+              <th>Resultado</th>
+              <th>Interpretação</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaResultados"></tbody>
+        </table>
+
+        <div class="explain">
+          <strong>Fórmulas usadas:</strong>
+          <div class="formula">Peso total = caixas por camada × camadas × peso de cada caixa</div>
+          <div class="formula">Carga na caixa inferior = camadas × peso de cada caixa</div>
+          <div class="formula">Sobrecarga em cima da 1ª camada = (camadas - 1) × peso de cada caixa</div>
+          <div class="formula">Resistência efetiva = BCT × fator da condição</div>
+          <div class="formula">Segurança = resistência efetiva ÷ (carga inferior × fator de segurança)</div>
+          <div class="formula">Pressão = força ÷ área de apoio</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  Simulador HTML + CSS + JavaScript para estudo de Engenharia, Logística, Embalagem e Resistência dos Materiais
+</footer>
+
+<script>
+let dados = {};
+let tempo = 0;
+
+function n(id){
+  return Number(document.getElementById(id).value);
+}
+
+function txt(id, valor){
+  document.getElementById(id).innerHTML = valor;
+}
+
+function classeSituacao(margem){
+  if(margem >= 1) return "ok";
+  if(margem >= 0.75) return "warn";
+  return "bad";
+}
+
+function nomeSituacao(margem){
+  if(margem >= 1) return "SEGURO";
+  if(margem >= 0.75) return "ATENÇÃO";
+  return "RISCO";
+}
+
+function calcular(){
+  const caixasCamada = Math.max(1, n("caixasCamada"));
+  const camadas = Math.max(1, n("camadas"));
+  const pesoCaixa = Math.max(0.1, n("pesoCaixa"));
+  const fs = Math.max(1, n("fs"));
+  const comp = Math.max(1, n("comp"));
+  const larg = Math.max(1, n("larg"));
+  const alt = Math.max(1, n("alt"));
+  const esp = Math.max(0.1, n("esp"));
+  const bct = Math.max(1, n("bct"));
+  const condicao = Number(document.getElementById("condicao").value);
+  const folga = Math.max(0, n("folga"));
+  const resProduto = Math.max(0, n("resProduto"));
+
+  const totalCaixas = caixasCamada * camadas;
+  const pesoTotal = totalCaixas * pesoCaixa;
+  const pesoTotalN = pesoTotal * 9.81;
+
+  const cargaInferior = camadas * pesoCaixa;
+  const sobrecarga = Math.max(0, (camadas - 1) * pesoCaixa);
+  const cargaInferiorN = cargaInferior * 9.81;
+
+  const areaBaseM2 = (comp/100) * (larg/100);
+  const pressaoPa = cargaInferiorN / areaBaseM2;
+  const pressaoKPa = pressaoPa / 1000;
+
+  const bctEfetivo = bct * condicao;
+  const necessario = cargaInferior * fs;
+  const margem = bctEfetivo / necessario;
+  const utilizacao = cargaInferior / bctEfetivo;
+
+  const esbeltez = alt / Math.min(comp, larg);
+  const indiceFlambagem = Math.min(2.5, utilizacao * (0.65 + esbeltez) * (1/condicao));
+  const flambagemPct = Math.min(100, indiceFlambagem * 50);
+
+  let deformacaoMM = alt * 10 * 0.025 * Math.pow(Math.max(0, utilizacao), 1.7);
+  if(utilizacao > 1) deformacaoMM += (utilizacao - 1) * alt * 10 * 0.09;
+  deformacaoMM = Math.min(deformacaoMM, alt * 10 * 0.35);
+
+  const riscoProdutoPorFolga = deformacaoMM > folga;
+  const riscoProdutoPorCarga = resProduto > 0 && sobrecarga > resProduto;
+  const riscoProduto = riscoProdutoPorFolga || riscoProdutoPorCarga;
+
+  dados = {
+    caixasCamada, camadas, pesoCaixa, fs, comp, larg, alt, esp, bct, condicao,
+    folga, resProduto, totalCaixas, pesoTotal, pesoTotalN, cargaInferior,
+    sobrecarga, cargaInferiorN, areaBaseM2, pressaoKPa, bctEfetivo,
+    necessario, margem, utilizacao, esbeltez, indiceFlambagem, flambagemPct,
+    deformacaoMM, riscoProduto
+  };
+
+  atualizarNumeros();
+}
+
+function atualizarNumeros(){
+  const c = classeSituacao(dados.margem);
+  const situacao = nomeSituacao(dados.margem);
+
+  txt("rPesoTotal", dados.pesoTotal.toFixed(1) + " kgf");
+  txt("rPesoTotalN", (dados.pesoTotalN/1000).toFixed(2) + " kN");
+
+  txt("rCargaInferior", dados.cargaInferior.toFixed(1) + " kgf");
+  txt("rSobrecarga", "Sobrecarga acima: " + dados.sobrecarga.toFixed(1) + " kgf");
+
+  txt("rBctEfetivo", dados.bctEfetivo.toFixed(1) + " kgf");
+  txt("rNecessario", "Necessário com segurança: " + dados.necessario.toFixed(1) + " kgf");
+
+  const elSit = document.getElementById("rSituacao");
+  elSit.className = "value " + c;
+  elSit.innerHTML = situacao;
+
+  txt("rMargem", "Margem = " + dados.margem.toFixed(2));
+
+  let flambTxt = "Baixa";
+  let flambClasse = "ok";
+  if(dados.flambagemPct > 70){ flambTxt = "Alta"; flambClasse = "bad"; }
+  else if(dados.flambagemPct > 40){ flambTxt = "Média"; flambClasse = "warn"; }
+
+  let deformClasse = dados.deformacaoMM <= dados.folga ? "ok" : "bad";
+  let produtoClasse = dados.riscoProduto ? "bad" : "ok";
+
+  let linhas = `
+    <tr>
+      <td>Quantidade total</td>
+      <td>${dados.totalCaixas} caixas</td>
+      <td>Total empilhado no pallet.</td>
+    </tr>
+    <tr>
+      <td>Pressão em cada caixa da primeira camada</td>
+      <td>${dados.pressaoKPa.toFixed(2)} kPa</td>
+      <td>Pressão média aplicada na área de base da caixa.</td>
+    </tr>
+    <tr>
+      <td>Uso da resistência da caixa</td>
+      <td>${(dados.utilizacao*100).toFixed(1)}%</td>
+      <td>Quanto da resistência efetiva está sendo exigida sem aplicar o fator de segurança.</td>
+    </tr>
+    <tr>
+      <td>Índice visual de flambagem</td>
+      <td><span class="pill ${flambClasse}">${flambTxt}</span></td>
+      <td>Quanto maior, maior a tendência de barriga lateral e perda de estabilidade.</td>
+    </tr>
+    <tr>
+      <td>Deformação vertical estimada</td>
+      <td><span class="pill ${deformClasse}">${dados.deformacaoMM.toFixed(1)} mm</span></td>
+      <td>Compara a deformação aproximada da caixa com a folga/proteção interna.</td>
+    </tr>
+    <tr>
+      <td>Risco ao produto interno</td>
+      <td><span class="pill ${produtoClasse}">${dados.riscoProduto ? "RISCO" : "PROTEGIDO"}</span></td>
+      <td>${dados.riscoProduto ? "A caixa pode deformar além da folga ou passar carga maior que a resistência do produto." : "Pelos dados informados, a proteção interna suporta a deformação estimada."}</td>
+    </tr>
+  `;
+  document.getElementById("tabelaResultados").innerHTML = linhas;
+}
+
+function desenhar(){
+  const canvas = document.getElementById("canvasBox");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.clearRect(0,0,W,H);
+  tempo += 0.035;
+
+  if(!dados.totalCaixas){
+    calcular();
+  }
+
+  const mostrarForcas = document.getElementById("mostrarForcas").checked;
+
+  const margem = dados.margem;
+  const utilizacao = Math.min(2.2, dados.utilizacao);
+  const risco = nomeSituacao(margem);
+
+  let corCaixa = "#f5c36a";
+  let borda = "#9a6424";
+  if(margem < 0.75){ corCaixa = "#ff8175"; borda = "#8a211f"; }
+  else if(margem < 1){ corCaixa = "#ffe069"; borda = "#8a7419"; }
+
+  const maxCols = Math.min(6, dados.caixasCamada);
+  const linhasCamada = Math.ceil(dados.caixasCamada / maxCols);
+
+  const baseW = Math.min(660, W - 170);
+  const boxW = baseW / maxCols;
+  const boxH0 = Math.min(58, 330 / dados.camadas);
+  const camadasVisiveis = Math.min(dados.camadas, 8);
+  const scaleCamadas = dados.camadas / camadasVisiveis;
+  const boxH = boxH0;
+  const startX = (W - baseW) / 2;
+  const palletY = H - 90;
+  const stackH = camadasVisiveis * boxH;
+  const startY = palletY - stackH;
+
+  const compress = Math.min(0.28, utilizacao * 0.075);
+  const wave = Math.sin(tempo * 2.2) * 0.5 + 0.5;
+  const deform = compress * (0.65 + 0.35 * wave);
+  const bottomSquash = boxH * deform;
+
+  // fundo
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#ffffff");
+  grad.addColorStop(1,"#d7ecff");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  // título
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 24px Arial";
+  ctx.fillText("Animação da sobrecarga na primeira camada", 26, 38);
+
+  ctx.font = "15px Arial";
+  ctx.fillText("Quanto maior a carga, maior a compressão, a barriga lateral e o risco de flambagem.", 26, 62);
+
+  // pallet
+  drawPallet(ctx, startX-25, palletY, baseW+50, 55);
+
+  // caixas
+  for(let layer=0; layer<camadasVisiveis; layer++){
+    const realLayer = dados.camadas - layer;
+    const yBase = palletY - (layer+1)*boxH + bottomSquash * (1 - layer/camadasVisiveis);
+    const cargaRelativa = (realLayer / dados.camadas);
+    const layerUtil = utilizacao * cargaRelativa;
+
+    for(let col=0; col<maxCols; col++){
+      const idx = col + 1;
+      if(idx > dados.caixasCamada && layer === 0) continue;
+
+      const x = startX + col*boxW;
+      let hLocal = boxH;
+
+      // a camada inferior aparece mais esmagada
+      if(layer === 0){
+        hLocal = boxH - bottomSquash;
+      }
+
+      let bulge = 0;
+      if(layer === 0){
+        bulge = Math.min(18, dados.flambagemPct/100 * 22 * (0.7 + 0.3*Math.sin(tempo*5 + col)));
+      }else if(layer < 3){
+        bulge = Math.min(8, dados.flambagemPct/100 * 8 * (0.5 + 0.5*Math.sin(tempo*3 + col)));
+      }
+
+      drawBox(ctx, x, yBase + (boxH - hLocal), boxW-2, hLocal-1, corCaixa, borda, bulge, layer, col);
+
+      if(layer === 0){
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.font = "bold 12px Arial";
+        ctx.fillText("1ª camada", x + 8, yBase + hLocal/2 + 5);
+      }
+    }
+  }
+
+  // camada reduzida se tiver muitas caixas
+  if(dados.camadas > camadasVisiveis){
+    ctx.fillStyle = "#102033";
+    ctx.font = "bold 14px Arial";
+    ctx.fillText("Representação compactada: " + dados.camadas + " camadas reais", startX, startY - 12);
+  }
+
+  if(mostrarForcas){
+    drawForces(ctx, W, H, startX, startY, baseW, stackH, palletY);
+    drawBucklingCurve(ctx, startX + baseW + 30, palletY - stackH + 20, palletY - 10, dados.flambagemPct);
+  }
+
+  // painel lateral
+  drawPanel(ctx, W-315, 92, 285, 255, risco);
+
+  // legenda de produto
+  drawProductRisk(ctx, startX, palletY + 58, baseW, dados.riscoProduto);
+
+  requestAnimationFrame(desenhar);
+}
+
+function drawBox(ctx, x, y, w, h, fill, stroke, bulge, layer, col){
+  ctx.save();
+
+  const g = ctx.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0, shade(fill, 18));
+  g.addColorStop(0.5, fill);
+  g.addColorStop(1, shade(fill, -12));
+  ctx.fillStyle = g;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1.3;
+
+  ctx.beginPath();
+  ctx.moveTo(x - bulge, y);
+  ctx.quadraticCurveTo(x - bulge*1.4, y + h/2, x - bulge, y + h);
+  ctx.lineTo(x + w + bulge, y + h);
+  ctx.quadraticCurveTo(x + w + bulge*1.4, y + h/2, x + w + bulge, y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // linhas do papelão
+  ctx.strokeStyle = "rgba(93,55,16,0.25)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x+w/2, y+4);
+  ctx.lineTo(x+w/2, y+h-4);
+  ctx.moveTo(x+5, y+h/2);
+  ctx.lineTo(x+w-5, y+h/2);
+  ctx.stroke();
+
+  // brilho
+  ctx.fillStyle = "rgba(255,255,255,0.16)";
+  ctx.fillRect(x+4,y+4,w-8,Math.max(3,h*0.16));
+
+  // linhas de envergadura na camada inferior
+  if(bulge > 4){
+    ctx.strokeStyle = "rgba(105,40,20,0.55)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let i=0;i<3;i++){
+      let yy = y + h*(0.25+i*0.22);
+      ctx.moveTo(x+8, yy);
+      ctx.quadraticCurveTo(x+w/2, yy + Math.sin(tempo*4+col+i)*bulge*0.55, x+w-8, yy);
+    }
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawPallet(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "#b97832";
+  ctx.strokeStyle = "#7a451d";
+  ctx.lineWidth = 2;
+
+  // tábuas superiores
+  for(let i=0;i<5;i++){
+    const ty = y + i*6;
+    ctx.fillStyle = i%2===0 ? "#c98940" : "#b97832";
+    roundRect(ctx, x, ty, w, 10, 4, true, true);
+  }
+
+  // base
+  ctx.fillStyle = "#9b5d25";
+  roundRect(ctx, x, y+30, w, 14, 4, true, true);
+
+  // blocos de apoio
+  const bw = w/7;
+  for(let i=0;i<4;i++){
+    let bx = x + i*(w-bw)/3;
+    ctx.fillStyle = "#a76328";
+    roundRect(ctx, bx, y+38, bw, h-28, 4, true, true);
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.fillRect(bx+6,y+43,bw-12,h-42);
+  }
+
+  ctx.fillStyle = "#6f3f1d";
+  ctx.font = "bold 15px Arial";
+  ctx.fillText("PALLET DE MADEIRA", x + w/2 - 70, y + h + 18);
+
+  ctx.restore();
+}
+
+function drawForces(ctx, W, H, startX, startY, baseW, stackH, palletY){
+  const centerX = startX + baseW/2;
+  const arrowAmp = 10 + Math.sin(tempo*4)*4;
+  const loadTxt = dados.cargaInferior.toFixed(1) + " kgf por caixa inferior";
+  const overTxt = dados.sobrecarga.toFixed(1) + " kgf de sobrecarga acima";
+
+  ctx.save();
+  ctx.strokeStyle = "#e33333";
+  ctx.fillStyle = "#e33333";
+  ctx.lineWidth = 4;
+
+  // seta grande para baixo
+  arrow(ctx, centerX, startY-45, centerX, startY+15+arrowAmp);
+  ctx.font = "bold 17px Arial";
+  ctx.fillText("Peso total: " + dados.pesoTotal.toFixed(1) + " kgf", centerX-105, startY-56);
+
+  // setas menores para primeira camada
+  const nArrows = Math.min(5, dados.caixasCamada);
+  for(let i=0;i<nArrows;i++){
+    const x = startX + baseW*(i+0.5)/nArrows;
+    arrow(ctx, x, palletY-125, x, palletY-72+arrowAmp*0.4);
+  }
+  ctx.fillText(loadTxt, startX + 12, palletY - 140);
+  ctx.fillText(overTxt, startX + 12, palletY - 116);
+
+  // reação do pallet
+  ctx.strokeStyle = "#187b38";
+  ctx.fillStyle = "#187b38";
+  ctx.lineWidth = 4;
+  for(let i=0;i<3;i++){
+    const x = startX + baseW*(i+0.5)/3;
+    arrow(ctx, x, palletY+48, x, palletY+5);
+  }
+  ctx.font = "bold 15px Arial";
+  ctx.fillText("Reação do pallet", startX + baseW - 150, palletY + 38);
+
+  ctx.restore();
+}
+
+function drawBucklingCurve(ctx, x, y1, y2, pct){
+  ctx.save();
+  const amp = 8 + pct/100 * 40;
+  ctx.strokeStyle = pct > 70 ? "#d62222" : pct > 40 ? "#c99a00" : "#157f3b";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  const steps = 80;
+  for(let i=0;i<=steps;i++){
+    const t = i/steps;
+    const y = y1 + (y2-y1)*t;
+    const x2 = x + Math.sin(t*Math.PI*2 + tempo*2)*amp*(0.4+0.6*t);
+    if(i===0) ctx.moveTo(x2,y);
+    else ctx.lineTo(x2,y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 15px Arial";
+  ctx.fillText("Flambagem / barriga lateral", x-45, y1-12);
+  ctx.font = "13px Arial";
+  ctx.fillText(pct.toFixed(0) + "% índice visual", x-20, y2+22);
+  ctx.restore();
+}
+
+function drawPanel(ctx, x, y, w, h, risco){
+  ctx.save();
+  ctx.fillStyle = "rgba(7,17,31,0.90)";
+  ctx.strokeStyle = "#2d5c82";
+  ctx.lineWidth = 2;
+  roundRect(ctx, x, y, w, h, 16, true, true);
+
+  const cls = classeSituacao(dados.margem);
+  let color = "#7dffb2";
+  if(cls==="warn") color = "#ffe66d";
+  if(cls==="bad") color = "#ff7474";
+
+  ctx.fillStyle = "#dff2ff";
+  ctx.font = "bold 19px Arial";
+  ctx.fillText("Painel de Engenharia", x+18, y+31);
+
+  ctx.fillStyle = color;
+  ctx.font = "bold 28px Arial";
+  ctx.fillText(risco, x+18, y+72);
+
+  ctx.fillStyle = "#c7def2";
+  ctx.font = "14px Arial";
+  let linhas = [
+    "Margem de segurança: " + dados.margem.toFixed(2),
+    "Uso da caixa: " + (dados.utilizacao*100).toFixed(1) + "%",
+    "Deformação: " + dados.deformacaoMM.toFixed(1) + " mm",
+    "Folga interna: " + dados.folga.toFixed(1) + " mm",
+    "Flambagem visual: " + dados.flambagemPct.toFixed(0) + "%",
+    "Pressão: " + dados.pressaoKPa.toFixed(2) + " kPa"
+  ];
+
+  for(let i=0;i<linhas.length;i++){
+    ctx.fillText(linhas[i], x+18, y+107+i*24);
+  }
+
+  ctx.restore();
+}
+
+function drawProductRisk(ctx, x, y, w, riscoProduto){
+  ctx.save();
+  ctx.fillStyle = riscoProduto ? "rgba(255,70,70,0.16)" : "rgba(70,255,150,0.14)";
+  ctx.strokeStyle = riscoProduto ? "#ff5555" : "#26b96a";
+  ctx.lineWidth = 2;
+  roundRect(ctx, x+30, y+5, w-60, 42, 12, true, true);
+
+  ctx.fillStyle = riscoProduto ? "#8f1f1f" : "#0c5d31";
+  ctx.font = "bold 16px Arial";
+  const msg = riscoProduto
+    ? "RISCO AO PRODUTO: deformação ou carga pode danificar o conteúdo"
+    : "PRODUTO PROTEGIDO: dados dentro da margem informada";
+  ctx.fillText(msg, x+50, y+32);
+  ctx.restore();
+}
+
+function arrow(ctx, x1, y1, x2, y2){
+  const head = 12;
+  const angle = Math.atan2(y2-y1, x2-x1);
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6), y2-head*Math.sin(angle-Math.PI/6));
+  ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6), y2-head*Math.sin(angle+Math.PI/6));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function roundRect(ctx, x, y, w, h, r, fill, stroke){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+  if(fill) ctx.fill();
+  if(stroke) ctx.stroke();
+}
+
+function shade(hex, percent){
+  let f=parseInt(hex.slice(1),16),t=percent<0?0:255,p=Math.abs(percent)/100,
+      R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+  return "#" + (0x1000000+
+    (Math.round((t-R)*p)+R)*0x10000+
+    (Math.round((t-G)*p)+G)*0x100+
+    (Math.round((t-B)*p)+B)
+  ).toString(16).slice(1);
+}
+
+function exemploLeve(){
+  document.getElementById("caixasCamada").value = 12;
+  document.getElementById("camadas").value = 4;
+  document.getElementById("pesoCaixa").value = 12;
+  document.getElementById("fs").value = 2;
+  document.getElementById("comp").value = 40;
+  document.getElementById("larg").value = 30;
+  document.getElementById("alt").value = 22;
+  document.getElementById("esp").value = 4;
+  document.getElementById("bct").value = 180;
+  document.getElementById("condicao").value = 1;
+  document.getElementById("folga").value = 10;
+  document.getElementById("resProduto").value = 80;
+  calcular();
+}
+
+function exemploRisco(){
+  document.getElementById("caixasCamada").value = 12;
+  document.getElementById("camadas").value = 7;
+  document.getElementById("pesoCaixa").value = 24;
+  document.getElementById("fs").value = 2;
+  document.getElementById("comp").value = 40;
+  document.getElementById("larg").value = 30;
+  document.getElementById("alt").value = 35;
+  document.getElementById("esp").value = 3;
+  document.getElementById("bct").value = 150;
+  document.getElementById("condicao").value = 0.70;
+  document.getElementById("folga").value = 6;
+  document.getElementById("resProduto").value = 70;
+  calcular();
+}
+
+document.querySelectorAll("input,select").forEach(el => {
+  el.addEventListener("input", calcular);
+  el.addEventListener("change", calcular);
+});
+
+calcular();
+desenhar();
+</script>
+</body>
+</html>
