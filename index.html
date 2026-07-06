@@ -2,408 +2,607 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Portal Processos & Engenharia 2026</title>
+<title>Central 2026 - Processos e Engenharia</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-:root{
-  --bg:#020617;
-  --panel:rgba(15,23,42,.72);
-  --line:rgba(148,163,184,.24);
-  --text:#f8fafc;
-  --muted:#b9c8dc;
-  --cyan:#38bdf8;
-  --amber:#f59e0b;
-  --green:#34d399;
-  --red:#fb7185;
-  --shadow:0 26px 80px rgba(0,0,0,.42);
-}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+:root{
+  --bg:#06101f;
+  --bg2:#0b1728;
+  --card:rgba(16,27,45,.72);
+  --line:rgba(148,185,226,.25);
+  --text:#eef6ff;
+  --muted:#a9c5df;
+  --gold:#f0b35b;
+  --blue:#58b7ff;
+  --green:#58f2a1;
+  --danger:#ff7474;
+}
 body{
   margin:0;
-  font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;
+  font-family:Arial, Helvetica, sans-serif;
   background:
-    radial-gradient(circle at 12% 10%,rgba(56,189,248,.22),transparent 34%),
-    radial-gradient(circle at 90% 15%,rgba(245,158,11,.18),transparent 32%),
-    radial-gradient(circle at 50% 100%,rgba(52,211,153,.12),transparent 38%),
-    var(--bg);
+    radial-gradient(circle at top left, rgba(88,183,255,.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(240,179,91,.15), transparent 32%),
+    linear-gradient(135deg,#030712,#07111f 45%,#111827);
   color:var(--text);
   min-height:100vh;
-  overflow-x:hidden;
 }
 body::before{
   content:"";
-  position:fixed;inset:0;pointer-events:none;opacity:.16;
+  position:fixed;
+  inset:0;
   background-image:
-    linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
-  background-size:45px 45px;
-  mask-image:linear-gradient(to bottom,#000,transparent 78%);
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom, rgba(0,0,0,.8), transparent 85%);
+  pointer-events:none;
 }
-.nav{
-  position:sticky;top:0;z-index:50;
-  background:rgba(2,6,23,.72);
-  backdrop-filter:blur(20px);
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:blur(18px);
+  background:rgba(6,16,31,.82);
   border-bottom:1px solid var(--line);
 }
-.nav-inner{
-  max-width:1240px;margin:auto;padding:12px 18px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
+.nav{
+  max-width:1450px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 18px;
 }
 .brand{
-  display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;min-width:max-content;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:var(--text);
 }
 .logo{
-  width:43px;height:43px;border-radius:16px;
-  display:grid;place-items:center;
-  color:#04111f;font-weight:1000;
-  background:linear-gradient(135deg,var(--cyan),var(--amber));
-  box-shadow:0 0 34px rgba(56,189,248,.38);
+  width:44px;
+  height:44px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--gold),#ff7a18);
+  color:#111827;
+  font-weight:900;
+  box-shadow:0 0 28px rgba(240,179,91,.38);
 }
-.brand b{display:block;font-size:15px;line-height:1.1}
-.brand small{display:block;color:var(--muted);font-weight:700;margin-top:3px;font-size:11px}
-.menu{display:flex;align-items:center;gap:8px}
-.menu-item{position:relative}
-.menu-link,.mobile-btn{
-  border:1px solid rgba(148,163,184,.22);
-  background:rgba(15,23,42,.54);
-  color:#eaf6ff;text-decoration:none;
-  padding:10px 13px;border-radius:14px;
-  font-size:14px;font-weight:800;cursor:pointer;
+.brand strong{display:block;font-size:15px}
+.brand span{display:block;font-size:12px;color:var(--muted)}
+.menu{
+  display:flex;
+  gap:8px;
+  align-items:center;
 }
-.menu-link:hover,.mobile-btn:hover{
-  border-color:rgba(56,189,248,.75);
-  box-shadow:0 0 22px rgba(56,189,248,.13);
+.menuItem{
+  position:relative;
+}
+.menuBtn{
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--text);
+  padding:11px 12px;
+  border-radius:13px;
+  cursor:pointer;
+  font-weight:700;
+}
+.menuBtn:hover{
+  background:rgba(255,255,255,.07);
+  border-color:var(--line);
 }
 .dropdown{
-  display:none;position:absolute;right:0;top:44px;min-width:270px;
-  background:rgba(15,23,42,.96);backdrop-filter:blur(20px);
-  border:1px solid rgba(148,163,184,.28);
-  border-radius:18px;padding:10px;box-shadow:var(--shadow);
+  position:absolute;
+  top:44px;
+  right:0;
+  width:320px;
+  padding:10px;
+  background:rgba(10,22,38,.96);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 18px 50px rgba(0,0,0,.38);
+  display:none;
+  backdrop-filter:blur(16px);
 }
-.dropdown a{
-  display:block;color:#dbeafe;text-decoration:none;padding:12px 12px;border-radius:12px;
-  font-weight:750;font-size:14px;border:1px solid transparent;
+.menuItem:hover .dropdown{display:block}
+.dropTitle{
+  color:var(--gold);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin:6px 8px 8px;
 }
-.dropdown a:hover{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.26);color:#fff}
-.menu-item:hover .dropdown{display:block}
-.mobile-btn{display:none}
-.mobile-panel{display:none}
+.dropLink{
+  display:grid;
+  grid-template-columns:38px 1fr;
+  gap:10px;
+  align-items:center;
+  text-decoration:none;
+  color:var(--text);
+  padding:10px;
+  border-radius:14px;
+  border:1px solid transparent;
+}
+.dropLink:hover{
+  background:rgba(255,255,255,.07);
+  border-color:var(--line);
+}
+.icon{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  background:rgba(88,183,255,.12);
+  border:1px solid rgba(88,183,255,.25);
+}
+.dropLink b{display:block;font-size:14px}
+.dropLink small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.mobileToggle{
+  display:none;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.06);
+  color:white;
+  padding:10px 12px;
+  border-radius:12px;
+  font-weight:bold;
+}
 .hero{
-  max-width:1240px;margin:0 auto;padding:60px 18px 26px;
-  display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;
+  max-width:1450px;
+  margin:auto;
+  padding:48px 18px 22px;
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:22px;
+  align-items:center;
 }
-.kicker{
-  display:inline-flex;gap:9px;align-items:center;
-  border:1px solid rgba(56,189,248,.38);
-  background:rgba(56,189,248,.10);
-  border-radius:999px;padding:8px 12px;color:#cffafe;font-weight:900;font-size:13px;
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#111827;
+  background:linear-gradient(135deg,var(--green),#8cffc1);
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:13px;
+  font-weight:900;
 }
-h1{
-  font-size:clamp(34px,6vw,72px);
-  line-height:.96;margin:16px 0 14px;letter-spacing:-2px;
+.hero h1{
+  font-size:clamp(32px,5vw,64px);
+  line-height:1.02;
+  margin:18px 0 14px;
+  letter-spacing:-.04em;
 }
-.gradient-text{
-  background:linear-gradient(135deg,#fff 10%,#7dd3fc 45%,#fed7aa 80%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+.hero p{
+  color:var(--muted);
+  font-size:18px;
+  line-height:1.6;
+  max-width:760px;
 }
-.hero p{color:#cbd5e1;font-size:18px;line-height:1.65;max-width:780px}
-.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.heroActions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:20px;
+}
 .btn{
-  display:inline-flex;align-items:center;gap:10px;text-decoration:none;
-  padding:14px 18px;border-radius:16px;font-weight:1000;
-  border:1px solid rgba(148,163,184,.24);color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:13px 18px;
+  border-radius:15px;
+  border:1px solid var(--line);
+  color:var(--text);
+  text-decoration:none;
+  font-weight:900;
+  background:rgba(255,255,255,.06);
 }
-.btn.primary{background:linear-gradient(135deg,#0284c7,#f59e0b);box-shadow:0 18px 45px rgba(2,132,199,.22)}
-.btn.ghost{background:rgba(15,23,42,.6)}
-.dashboard{
+.btn.primary{
+  background:linear-gradient(135deg,var(--gold),#ff7a18);
+  color:#111827;
+  border-color:transparent;
+  box-shadow:0 12px 36px rgba(240,179,91,.25);
+}
+.panel3d{
+  min-height:360px;
+  border:1px solid var(--line);
+  border-radius:30px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,255,255,.03)),
+    radial-gradient(circle at 30% 20%, rgba(88,183,255,.22), transparent 38%),
+    radial-gradient(circle at 80% 70%, rgba(240,179,91,.18), transparent 42%);
+  box-shadow:0 25px 80px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
   position:relative;
-  border:1px solid rgba(148,163,184,.22);
-  background:linear-gradient(180deg,rgba(15,23,42,.72),rgba(15,23,42,.42));
-  border-radius:30px;padding:18px;box-shadow:var(--shadow);
   overflow:hidden;
 }
-.dashboard::before{
-  content:"";position:absolute;inset:-80px;background:conic-gradient(from 130deg,transparent,#38bdf8,transparent,#f59e0b,transparent);
-  opacity:.16;animation:spin 8s linear infinite;
+.flow{
+  position:absolute;
+  inset:22px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
-.dash-inner{position:relative;background:rgba(2,6,23,.82);border:1px solid rgba(148,163,184,.17);border-radius:24px;padding:18px}
-.status-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.status{
-  min-height:110px;border-radius:18px;padding:14px;background:rgba(15,23,42,.88);
-  border:1px solid rgba(148,163,184,.20);
+.node{
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(6,16,31,.58);
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:120px;
 }
-.status span{display:block;color:#9fb4cf;font-size:12px;font-weight:900;text-transform:uppercase}
-.status b{display:block;font-size:30px;margin-top:10px}
-.bar{height:9px;border-radius:999px;background:#0f172a;overflow:hidden;margin-top:12px}
-.fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--green),var(--amber));animation:pulsebar 2.4s ease-in-out infinite alternate}
-@keyframes pulsebar{from{width:58%}to{width:96%}}
+.node b{font-size:16px}
+.node span{color:var(--muted);font-size:12px;line-height:1.35}
+.pulse{
+  height:8px;
+  border-radius:99px;
+  background:linear-gradient(90deg,var(--blue),var(--gold));
+  animation:pulse 1.6s infinite alternate;
+}
+@keyframes pulse{from{opacity:.35;transform:scaleX(.68)}to{opacity:1;transform:scaleX(1)}}
 .section{
-  max-width:1240px;margin:0 auto;padding:28px 18px;
+  max-width:1450px;
+  margin:auto;
+  padding:18px;
 }
-.section-head{
-  display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:16px;
+.sectionHead{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:end;
+  margin:10px 0 16px;
 }
-.section h2{font-size:30px;margin:0}
-.section p{color:#b9c8dc;line-height:1.55}
-.search-box{
-  display:flex;gap:10px;align-items:center;
-  min-width:min(390px,100%);
-  border:1px solid rgba(148,163,184,.26);
-  background:rgba(15,23,42,.58);
-  border-radius:18px;padding:10px 12px;
+.sectionHead h2{font-size:28px;margin:0}
+.sectionHead p{color:var(--muted);margin:6px 0 0}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
 }
-.search-box input{
-  width:100%;border:none;outline:none;background:transparent;color:#fff;font-size:15px;
+.card{
+  position:relative;
+  overflow:hidden;
+  min-height:250px;
+  padding:18px;
+  border-radius:24px;
+  border:1px solid var(--line);
+  background:var(--card);
+  backdrop-filter:blur(14px);
+  box-shadow:0 18px 50px rgba(0,0,0,.25);
 }
-.grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+.card::after{
+  content:"";
+  position:absolute;
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  right:-70px;
+  top:-70px;
+  background:rgba(88,183,255,.10);
 }
-.app-card{
-  position:relative;overflow:hidden;
-  border:1px solid rgba(148,163,184,.23);
-  background:linear-gradient(180deg,rgba(15,23,42,.78),rgba(15,23,42,.46));
-  border-radius:24px;padding:18px;min-height:260px;
-  box-shadow:0 20px 55px rgba(0,0,0,.24);
+.card.gold::after{background:rgba(240,179,91,.14)}
+.card.green::after{background:rgba(88,242,161,.13)}
+.card h3{margin:12px 0 8px;font-size:20px}
+.card p{color:var(--muted);line-height:1.45}
+.cardIcon{
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--line);
+  font-size:25px;
 }
-.app-card:hover{transform:translateY(-4px);border-color:rgba(56,189,248,.58);transition:.18s ease}
-.card-glow{
-  position:absolute;inset:auto -40px -70px auto;width:180px;height:180px;border-radius:999px;
-  background:rgba(56,189,248,.18);filter:blur(18px);
+.cardActions{
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:18px;
+  display:flex;
+  gap:8px;
 }
-.card-top{display:flex;justify-content:space-between;align-items:center;position:relative}
-.app-icon{
-  width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:25px;
-  background:rgba(2,6,23,.82);border:1px solid rgba(148,163,184,.24);
+.openBtn{
+  flex:1;
+  text-align:center;
+  text-decoration:none;
+  color:#111827;
+  background:linear-gradient(135deg,var(--gold),#ffb55b);
+  padding:11px 12px;
+  border-radius:14px;
+  font-weight:900;
 }
-.tag{
-  color:#08111f;background:linear-gradient(135deg,#7dd3fc,#fdba74);
-  border-radius:999px;font-weight:1000;font-size:11px;padding:7px 9px;
+.openBtn.secondary{
+  color:var(--text);
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--line);
 }
-.app-card h3{position:relative;font-size:22px;margin:18px 0 8px}
-.app-card p{position:relative;color:#b9c8dc;line-height:1.55;min-height:70px}
-.open-btn{
-  position:absolute;left:18px;right:18px;bottom:18px;
-  display:flex;align-items:center;justify-content:space-between;
-  color:#fff;text-decoration:none;font-weight:1000;
-  padding:13px 14px;border-radius:15px;
-  background:rgba(2,6,23,.72);border:1px solid rgba(148,163,184,.24);
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
 }
-.open-btn:hover{background:linear-gradient(135deg,#0369a1,#c2410c);border-color:transparent}
-.quick{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;
+.kpi{
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:16px;
+  background:rgba(16,27,45,.72);
 }
-.quick a{
-  min-height:95px;padding:14px;border-radius:20px;border:1px solid rgba(148,163,184,.22);
-  background:rgba(15,23,42,.55);color:#e2e8f0;text-decoration:none;font-weight:900;
+.kpi strong{display:block;font-size:26px}
+.kpi span{color:var(--muted);font-size:13px}
+.searchBox{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  max-width:430px;
 }
-.quick a span{display:block;color:#94a3b8;font-size:12px;font-weight:700;margin-top:7px}
+.searchBox input{
+  flex:1;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:white;
+  font-size:15px;
+}
+.searchBox button{
+  border:0;
+  border-radius:12px;
+  background:var(--blue);
+  color:#06101f;
+  font-weight:900;
+  padding:9px 12px;
+}
 .footer{
-  max-width:1240px;margin:20px auto 0;padding:25px 18px 45px;color:#94a3b8;text-align:center;
+  max-width:1450px;
+  margin:20px auto;
+  padding:18px;
+  color:var(--muted);
+  border-top:1px solid var(--line);
 }
-@media(max-width:980px){
-  .hero{grid-template-columns:1fr;padding-top:34px}
-  .grid{grid-template-columns:1fr 1fr}
-  .quick{grid-template-columns:1fr 1fr}
-  .section-head{align-items:flex-start;flex-direction:column}
+@media(max-width:1050px){
+  .hero{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr 1fr}
+  .dashboard{grid-template-columns:1fr 1fr}
+  .mobileToggle{display:block}
+  .menu{
+    display:none;
+    position:absolute;
+    top:70px;
+    left:12px;
+    right:12px;
+    background:rgba(6,16,31,.96);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:10px;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .menu.open{display:flex}
+  .menuItem:hover .dropdown{display:none}
+  .menuItem.active .dropdown{display:block;position:static;width:100%;margin-top:8px}
+  .menuBtn{width:100%;text-align:left}
 }
-@media(max-width:760px){
-  .menu{display:none}
-  .mobile-btn{display:inline-flex}
-  .nav-inner{align-items:center}
-  .mobile-panel.open{
-    display:grid;gap:8px;padding:0 18px 14px;max-width:1240px;margin:auto;
-  }
-  .mobile-panel a{
-    color:#dbeafe;text-decoration:none;font-weight:850;
-    padding:12px;border-radius:14px;border:1px solid rgba(148,163,184,.22);
-    background:rgba(15,23,42,.62);
-  }
-  .grid{grid-template-columns:1fr}
-  .quick{grid-template-columns:1fr}
-  .status-row{grid-template-columns:1fr}
+@media(max-width:650px){
+  .cards{grid-template-columns:1fr}
+  .dashboard{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr}
+  .panel3d{min-height:620px}
 }
 </style>
 </head>
 <body>
-<nav class="nav">
-  <div class="nav-inner">
+
+<nav class="topbar">
+  <div class="nav">
     <a class="brand" href="index.html">
-      <span class="logo">RV</span>
-      <span><b>Portal Processos & Engenharia</b><small>Menu 2026 • HTML, CSS e JS</small></span>
+      <div class="logo">RV</div>
+      <div>
+        <strong>Central Engenharia & Processos 2026</strong>
+        <span>Produção • Biscoitos • Embalagem • Cálculo</span>
+      </div>
     </a>
 
-    <div class="menu">
-      <a class="menu-link" href="#entrada">Entrada</a>
-      <div class="menu-item">
-        <button class="menu-link">Processos ▾</button>
-        <div class="dropdown">
-          <a href="processos_linha_biscoitos_v1.html">Linha de Biscoitos V1</a>
-<a href="processos_linha_biscoitos_v2.html">Linha de Biscoitos V2</a>
-<a href="processos_linha_biscoitos_v3.html">Linha de Biscoitos V3</a>
-<a href="processos_empacotadoras_bobinas.html">Empacotadoras e Bobinas</a>
-<a href="processos_peso_rolo_formas.html">Peso por Rolo e Formas</a>
-        </div>
-      </div>
-      <div class="menu-item">
-        <button class="menu-link">Engenharia ▾</button>
-        <div class="dropdown">
-          <a href="engenharia_caixas_pallet.html">Engenharia de Caixas no Pallet</a>
-        </div>
-      </div>
-      <a class="menu-link" href="#todos">Todos os sistemas</a>
-    </div>
+    <button class="mobileToggle" onclick="toggleMenu()">☰ Menu</button>
 
-    <button class="mobile-btn" onclick="toggleMenu()">☰ Menu</button>
-  </div>
-  <div id="mobilePanel" class="mobile-panel">
-    <a href="#entrada">🏠 Entrada</a>
-    <a href="processos_linha_biscoitos_v1.html">🍪 Linha de Biscoitos</a>
-    <a href="processos_empacotadoras_bobinas.html">📦 Empacotadoras e Bobinas</a>
-    <a href="processos_peso_rolo_formas.html">⚖️ Peso por Rolo</a>
-    <a href="engenharia_caixas_pallet.html">🏗️ Engenharia Pallet</a>
-    <a href="#todos">🔗 Todos os links</a>
+    <div id="menu" class="menu">
+      <div class="menuItem">
+        <button class="menuBtn" onclick="toggleDrop(this)">🏠 Entrada</button>
+        <div class="dropdown">
+          <div class="dropTitle">Página inicial</div>
+          <a class="dropLink" href="#inicio"><span class="icon">🚀</span><span><b>Dashboard</b><small>Visão geral dos módulos</small></span></a>
+          <a class="dropLink" href="#modulos"><span class="icon">🧩</span><span><b>Módulos</b><small>Todos os simuladores linkados</small></span></a>
+        </div>
+      </div>
+
+      <div class="menuItem">
+        <button class="menuBtn" onclick="toggleDrop(this)">🏭 Processos</button>
+        <div class="dropdown">
+          <div class="dropTitle">Linha de biscoitos</div>
+          <a class="dropLink" href="processos_linha_biscoito_recheado.html"><span class="icon">🍪</span><span><b>Linha e recheado</b><small>Forno, resfriamento, massa e recheio</small></span></a>
+          <a class="dropLink" href="capacidade_total_fabricacao_coifas_bateladas.html"><span class="icon">🏭</span><span><b>Capacidade total</b><small>Coifas, fornos, linhas e bateladas</small></span></a>
+          <a class="dropLink" href="auditoria_processos_fabricacao_linhas.html"><span class="icon">🔍</span><span><b>Auditoria de processos</b><small>Padrões, água, gráficos e relatório</small></span></a>
+          <a class="dropLink" href="calculadora_biscoitos_empacotadoras_bobinas.html"><span class="icon">📦</span><span><b>Empacotadoras e bobinas</b><small>Pacotes/min, caixas e filme</small></span></a>
+          <a class="dropLink" href="calculadora_biscoitos_antiga_relatorio.html"><span class="icon">🧾</span><span><b>Produção com relatório</b><small>Modelo antigo com impressão</small></span></a>
+          <a class="dropLink" href="calculadora_biscoitos_rpm_cronometro.html"><span class="icon">⏱️</span><span><b>RPM e cronômetro</b><small>Volta inteira do rolo</small></span></a>
+        </div>
+      </div>
+
+      <div class="menuItem">
+        <button class="menuBtn" onclick="toggleDrop(this)">⚙️ Engenharia</button>
+        <div class="dropdown">
+          <div class="dropTitle">Cálculos aplicados</div>
+          <a class="dropLink" href="engenharia_calculo_limites_derivadas.html"><span class="icon">📈</span><span><b>Limites e derivadas</b><small>Cálculo aplicado à engenharia</small></span></a>
+          <a class="dropLink" href="simulador_caixas_pallet_flambagem.html"><span class="icon">🧱</span><span><b>Caixas no pallet</b><small>Sobrecarga, flambagem e resistência</small></span></a>
+          <a class="dropLink" href="calculadora_peso_biscoitos_rolo.html"><span class="icon">⚖️</span><span><b>Peso por rolo</b><small>Formas, giros, peso cru e assado</small></span></a>
+        </div>
+      </div>
+
+      <div class="menuItem">
+        <button class="menuBtn" onclick="toggleDrop(this)">🖨️ Relatórios</button>
+        <div class="dropdown">
+          <div class="dropTitle">Impressão</div>
+          <a class="dropLink" href="processos_linha_biscoito_recheado.html"><span class="icon">🖨️</span><span><b>Relatório de processo</b><small>Produção, forno e resfriamento</small></span></a>
+          <a class="dropLink" href="calculadora_biscoitos_empacotadoras_bobinas.html"><span class="icon">📑</span><span><b>Relatório bobinas</b><small>Pacotes/min e trocas</small></span></a>
+        </div>
+      </div>
+    </div>
   </div>
 </nav>
 
-<header id="entrada" class="hero">
-  <section>
-    <span class="kicker">⚙️ Entrada principal com submenus linkados</span>
-    <h1><span class="gradient-text">Processos Industriais</span><br>e Engenharia 2026</h1>
-    <p>Portal moderno para acessar seus simuladores de linha de biscoitos, produção, empacotadoras, bobinas, peso por rolo e engenharia de resistência de caixas no pallet.</p>
-    <div class="actions">
-      <a class="btn primary" href="#todos">Abrir sistemas</a>
-      <a class="btn ghost" href="processos_linha_biscoitos_v1.html">Começar pela linha de processo</a>
+<section id="inicio" class="hero">
+  <div>
+    <span class="badge">✅ Todos os programas linkados em uma entrada única</span>
+    <h1>Menu moderno 2026 para Processos e Engenharia</h1>
+    <p>
+      Uma central única para abrir seus simuladores de produção, linha de biscoito recheado,
+      empacotadoras, bobinas, pallet, resistência e cálculo aplicado à engenharia.
+    </p>
+    <div class="heroActions">
+      <a class="btn primary" href="processos_linha_biscoito_recheado.html">Abrir processos</a>
+      <a class="btn" href="engenharia_calculo_limites_derivadas.html">Abrir engenharia</a>
+      <a class="btn" href="#modulos">Ver todos</a>
     </div>
-  </section>
+  </div>
 
-  <aside class="dashboard">
-    <div class="dash-inner">
-      <div class="status-row">
-        <div class="status"><span>Páginas linkadas</span><b>6</b><div class="bar"><div class="fill"></div></div></div>
-        <div class="status"><span>Menus</span><b>2</b><div class="bar"><div class="fill"></div></div></div>
-        <div class="status"><span>Área</span><b>Processos</b><div class="bar"><div class="fill"></div></div></div>
-        <div class="status"><span>Área</span><b>Engenharia</b><div class="bar"><div class="fill"></div></div></div>
-      </div>
+  <div class="panel3d">
+    <div class="flow">
+      <div class="node"><b>Entrada</b><span>Menu principal, dashboard e submenus por área.</span><div class="pulse"></div></div>
+      <div class="node"><b>Processos</b><span>Massa, forno, resfriamento, recheio, empacotamento e bobinas.</span><div class="pulse"></div></div>
+      <div class="node"><b>Engenharia</b><span>Cálculo, peso, pallet, compressão, limites e derivadas.</span><div class="pulse"></div></div>
+      <div class="node"><b>Relatórios</b><span>Impressão em A4 nos módulos que possuem relatório.</span><div class="pulse"></div></div>
+      <div class="node"><b>Simulação</b><span>Animações em Canvas para explicar o processo.</span><div class="pulse"></div></div>
+      <div class="node"><b>Produção</b><span>Pacotes, caixas, bobinas e gargalos da linha.</span><div class="pulse"></div></div>
     </div>
-  </aside>
-</header>
+  </div>
+</section>
 
 <section class="section">
-  <div class="section-head">
-    <div>
-      <h2>Acesso rápido</h2>
-      <p>Atalhos principais para entrar direto nas partes mais usadas.</p>
-    </div>
-  </div>
-  <div class="quick">
-    <a href="processos_linha_biscoitos_v1.html">🍪 Processo de Biscoitos<span>Forno, resfriamento, batelada e recheado</span></a>
-    <a href="processos_empacotadoras_bobinas.html">📦 Empacotadoras<span>Pacotes/min, máquinas e bobinas</span></a>
-    <a href="processos_peso_rolo_formas.html">⚖️ Peso por Rolo<span>Giros, formas, peso cru e assado</span></a>
-    <a href="engenharia_caixas_pallet.html">🏗️ Engenharia Pallet<span>Sobrecarga, flambagem e resistência</span></a>
+  <div class="dashboard">
+    <div class="kpi"><strong>9</strong><span>Módulos principais</span></div>
+    <div class="kpi"><strong>2026</strong><span>Visual moderno e responsivo</span></div>
+    <div class="kpi"><strong>A4</strong><span>Relatórios de impressão</span></div>
+    <div class="kpi"><strong>HTML</strong><span>CSS + JS sem instalação</span></div>
   </div>
 </section>
 
-<section id="todos" class="section">
-  <div class="section-head">
+<section id="modulos" class="section">
+  <div class="sectionHead">
     <div>
-      <h2>Todos os sistemas linkados</h2>
-      <p>Use a busca para localizar rápido por processo, produção, bobina, pallet ou engenharia.</p>
+      <h2>Módulos do sistema</h2>
+      <p>Escolha a página que deseja abrir.</p>
     </div>
-    <label class="search-box">🔎 <input id="search" type="search" placeholder="Pesquisar sistema..." oninput="filterCards()"></label>
+    <div class="searchBox">
+      <input id="busca" placeholder="Buscar módulo..." oninput="filtrarCards()">
+      <button onclick="limparBusca()">Limpar</button>
+    </div>
   </div>
 
-  <div id="cards" class="grid">
-    
-      <article class="app-card" data-filter="processos linha de biscoitos v1 produção total, biscoito recheado, forno, resfriamento, batelada e massa.">
-        <div class="card-glow"></div>
-        <div class="card-top">
-          <span class="app-icon">🍪</span>
-          <span class="tag">PROCESSOS</span>
-        </div>
-        <h3>Linha de Biscoitos V1</h3>
-        <p>Produção total, biscoito recheado, forno, resfriamento, batelada e massa.</p>
-        <a class="open-btn" href="processos_linha_biscoitos_v1.html">Abrir página <span>→</span></a>
-      </article>
-    
+  <div class="cards" id="cards">
+    <article class="card" data-tags="auditoria processos padrões padroes linhas fabricação fabricacao moldagem forneamento empacotamento quebra agua gráficos graficos relatório">
+      <div class="cardIcon">🔍</div>
+      <h3>Auditoria de processos</h3>
+      <p>Verifica padrões das linhas, quebra de água, moldagem, forneamento, empacotamento, entrega, rostinhos e gráficos.</p>
+      <div class="cardActions"><a class="openBtn" href="auditoria_processos_fabricacao_linhas.html">Abrir</a></div>
+    </article>
 
-      <article class="app-card" data-filter="processos linha de biscoitos v2 segunda versão do simulador de processo de biscoitos.">
-        <div class="card-glow"></div>
-        <div class="card-top">
-          <span class="app-icon">🍪</span>
-          <span class="tag">PROCESSOS</span>
-        </div>
-        <h3>Linha de Biscoitos V2</h3>
-        <p>Segunda versão do simulador de processo de biscoitos.</p>
-        <a class="open-btn" href="processos_linha_biscoitos_v2.html">Abrir página <span>→</span></a>
-      </article>
-    
+    <article class="card green" data-tags="capacidade total fabricação fabricacao coifas fornos linhas bateladas kilos kg">
+      <div class="cardIcon">🏭</div>
+      <h3>Capacidade total de fabricação</h3>
+      <p>Calcula quanto a fábrica suporta em kg pelo limite das coifas/fornos/linhas e pelas bateladas de massa.</p>
+      <div class="cardActions"><a class="openBtn" href="capacidade_total_fabricacao_coifas_bateladas.html">Abrir</a></div>
+    </article>
 
-      <article class="app-card" data-filter="processos linha de biscoitos v3 terceira versão do simulador de linha de processo.">
-        <div class="card-glow"></div>
-        <div class="card-top">
-          <span class="app-icon">🍪</span>
-          <span class="tag">PROCESSOS</span>
-        </div>
-        <h3>Linha de Biscoitos V3</h3>
-        <p>Terceira versão do simulador de linha de processo.</p>
-        <a class="open-btn" href="processos_linha_biscoitos_v3.html">Abrir página <span>→</span></a>
-      </article>
-    
+    <article class="card gold" data-tags="processo linha biscoito recheado forno resfriamento massa">
+      <div class="cardIcon">🍪</div>
+      <h3>Linha de biscoito recheado</h3>
+      <p>Processo completo com batelada de massa, forno, resfriamento, recheio, gargalo, desenvolvimento e relatório.</p>
+      <div class="cardActions"><a class="openBtn" href="processos_linha_biscoito_recheado.html">Abrir</a></div>
+    </article>
 
-      <article class="app-card" data-filter="processos empacotadoras e bobinas pacotes por minuto, máquinas empacotadoras, bobinas e relatório.">
-        <div class="card-glow"></div>
-        <div class="card-top">
-          <span class="app-icon">📦</span>
-          <span class="tag">PROCESSOS</span>
-        </div>
-        <h3>Empacotadoras e Bobinas</h3>
-        <p>Pacotes por minuto, máquinas empacotadoras, bobinas e relatório.</p>
-        <a class="open-btn" href="processos_empacotadoras_bobinas.html">Abrir página <span>→</span></a>
-      </article>
-    
+    <article class="card green" data-tags="empacotadoras bobinas pacote minuto embalagem filme caixas">
+      <div class="cardIcon">📦</div>
+      <h3>Empacotadoras e bobinas</h3>
+      <p>Calcula pacotes por minuto, capacidade das máquinas, bobinas usadas, trocas, caixas e relatório.</p>
+      <div class="cardActions"><a class="openBtn" href="calculadora_biscoitos_empacotadoras_bobinas.html">Abrir</a></div>
+    </article>
 
-      <article class="app-card" data-filter="processos peso por rolo e formas cálculo por formas do rolo, giros, peso cru e peso assado.">
-        <div class="card-glow"></div>
-        <div class="card-top">
-          <span class="app-icon">⚖️</span>
-          <span class="tag">PROCESSOS</span>
-        </div>
-        <h3>Peso por Rolo e Formas</h3>
-        <p>Cálculo por formas do rolo, giros, peso cru e peso assado.</p>
-        <a class="open-btn" href="processos_peso_rolo_formas.html">Abrir página <span>→</span></a>
-      </article>
-    
+    <article class="card" data-tags="engenharia limite derivada cálculo gráfico função">
+      <div class="cardIcon">📈</div>
+      <h3>Engenharia: limites e derivadas</h3>
+      <p>Calculadora de função, limite, primeira derivada, segunda derivada, reta tangente e interpretação aplicada.</p>
+      <div class="cardActions"><a class="openBtn" href="engenharia_calculo_limites_derivadas.html">Abrir</a></div>
+    </article>
 
-      <article class="app-card" data-filter="engenharia engenharia de caixas no pallet sobrecarga, flambagem, resistência e risco no empilhamento.">
-        <div class="card-glow"></div>
-        <div class="card-top">
-          <span class="app-icon">🏗️</span>
-          <span class="tag">ENGENHARIA</span>
-        </div>
-        <h3>Engenharia de Caixas no Pallet</h3>
-        <p>Sobrecarga, flambagem, resistência e risco no empilhamento.</p>
-        <a class="open-btn" href="engenharia_caixas_pallet.html">Abrir página <span>→</span></a>
-      </article>
-    
+    <article class="card gold" data-tags="pallet caixa sobrecarga flambagem resistência papelão produto">
+      <div class="cardIcon">🧱</div>
+      <h3>Caixas no pallet</h3>
+      <p>Simula sobrepeso, pressão, flambagem do papelão, resistência da caixa e risco ao produto.</p>
+      <div class="cardActions"><a class="openBtn" href="simulador_caixas_pallet_flambagem.html">Abrir</a></div>
+    </article>
+
+    <article class="card green" data-tags="biscoito rolo formas giros peso cru assado">
+      <div class="cardIcon">⚖️</div>
+      <h3>Peso por rolo</h3>
+      <p>Calcula peso de biscoitos por formas, giros, gramas cru, gramas assado e perdas.</p>
+      <div class="cardActions"><a class="openBtn" href="calculadora_peso_biscoitos_rolo.html">Abrir</a></div>
+    </article>
+
+    <article class="card" data-tags="rpm cronômetro volta inteira rolo minuto segundo">
+      <div class="cardIcon">⏱️</div>
+      <h3>RPM e cronômetro</h3>
+      <p>Calcula giros por RPM ou por tempo cronometrado de uma volta inteira do rolo.</p>
+      <div class="cardActions"><a class="openBtn" href="calculadora_biscoitos_rpm_cronometro.html">Abrir</a></div>
+    </article>
+
+    <article class="card gold" data-tags="relatório antigo produção imprimir pacote caixa">
+      <div class="cardIcon">🧾</div>
+      <h3>Produção com relatório</h3>
+      <p>Modelo anterior com cálculo de produção e relatório pronto para imprimir.</p>
+      <div class="cardActions"><a class="openBtn" href="calculadora_biscoitos_antiga_relatorio.html">Abrir</a></div>
+    </article>
   </div>
 </section>
 
-<footer class="footer">
-  Portal Processos & Engenharia 2026 • Professor Renato • Arquivos HTML linkados em menu moderno com submenus.
-</footer>
+<section class="footer">
+  Central criada para organizar páginas de processo e engenharia. Para os links funcionarem fora daqui, mantenha todos os arquivos HTML na mesma pasta do index.html.
+</section>
 
 <script>
 function toggleMenu(){
-  document.getElementById('mobilePanel').classList.toggle('open');
+  document.getElementById("menu").classList.toggle("open");
 }
-function filterCards(){
-  const q = document.getElementById('search').value.toLowerCase().trim();
-  document.querySelectorAll('.app-card').forEach(card => {
-    card.style.display = card.dataset.filter.includes(q) ? '' : 'none';
+function toggleDrop(btn){
+  if(window.innerWidth > 1050) return;
+  const item = btn.parentElement;
+  document.querySelectorAll(".menuItem").forEach(i => {
+    if(i !== item) i.classList.remove("active");
+  });
+  item.classList.toggle("active");
+}
+function filtrarCards(){
+  const q = document.getElementById("busca").value.toLowerCase().trim();
+  document.querySelectorAll("#cards .card").forEach(card => {
+    const txt = (card.innerText + " " + card.dataset.tags).toLowerCase();
+    card.style.display = txt.includes(q) ? "block" : "none";
   });
 }
+function limparBusca(){
+  document.getElementById("busca").value = "";
+  filtrarCards();
+}
 </script>
+
 </body>
 </html>

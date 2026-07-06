@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de Produção de Biscoitos - Rolo, Formas e Peso</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#08111f;
+    color:#f2f7ff;
+  }
+  header{
+    background:linear-gradient(135deg,#0d1b31,#593816,#111827);
+    border-bottom:3px solid #f0b35b;
+    text-align:center;
+    padding:24px 14px;
+  }
+  header h1{margin:0;font-size:28px}
+  header p{margin:8px 0 0;color:#ffe0b5}
+  main{max-width:1350px;margin:auto;padding:16px}
+  .layout{
+    display:grid;
+    grid-template-columns:380px 1fr;
+    gap:16px;
+  }
+  .card{
+    background:#101b2d;
+    border:1px solid #314760;
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 0 20px rgba(0,0,0,.28);
+  }
+  h2{
+    margin:0 0 12px;
+    font-size:20px;
+    color:#ffd08a;
+  }
+  h3{
+    margin:18px 0 8px;
+    font-size:16px;
+    color:#e9f2ff;
+  }
+  label{
+    display:block;
+    margin-top:10px;
+    margin-bottom:4px;
+    font-size:14px;
+    font-weight:bold;
+    color:#dcecff;
+  }
+  input,select{
+    width:100%;
+    padding:11px;
+    border-radius:11px;
+    border:1px solid #46617d;
+    background:#07111f;
+    color:white;
+    outline:none;
+    font-size:15px;
+  }
+  input:focus,select:focus{border-color:#f0b35b}
+  button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#e98725;
+    color:#111827;
+    font-weight:bold;
+    margin-top:12px;
+    cursor:pointer;
+    font-size:15px;
+  }
+  button:hover{background:#ffb55b}
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .check{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    color:#cfe6ff;
+    margin-top:10px;
+    font-size:14px;
+  }
+  .check input{width:auto}
+  .resultGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .metric{
+    background:#07111f;
+    border:1px solid #314760;
+    border-radius:16px;
+    padding:13px;
+    min-height:96px;
+  }
+  .metric .title{
+    color:#b9d2ec;
+    font-size:13px;
+    margin-bottom:7px;
+  }
+  .metric .value{
+    color:#fff;
+    font-size:24px;
+    font-weight:bold;
+  }
+  .metric .small{
+    color:#b9d2ec;
+    font-size:12px;
+    margin-top:6px;
+    line-height:1.3;
+  }
+  #canvas{
+    width:100%;
+    height:540px;
+    display:block;
+    background:linear-gradient(#fff6e8,#dbeaff);
+    border:1px solid #8bb7db;
+    border-radius:18px;
+  }
+  .explain{
+    background:#07111f;
+    border-left:5px solid #e98725;
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+    color:#dcecff;
+    line-height:1.5;
+  }
+  .formula{
+    background:#091426;
+    color:#ffdf93;
+    border:1px solid #304969;
+    padding:8px;
+    border-radius:8px;
+    font-family:Consolas, monospace;
+    overflow:auto;
+    margin-top:6px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    overflow:hidden;
+    border-radius:12px;
+    font-size:14px;
+  }
+  th,td{
+    padding:9px;
+    border-bottom:1px solid #314760;
+    text-align:left;
+  }
+  th{background:#142a42;color:#ffe0b5}
+  td{background:#081525;color:#e8f3ff}
+  .pill{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-weight:bold;
+    color:#111827;
+  }
+  .ok{background:#83f6a5}
+  .warn{background:#ffe36d}
+  .bad{background:#ff7777}
+  footer{
+    text-align:center;
+    padding:18px;
+    color:#adc2d6;
+  }
+  @media(max-width:980px){
+    .layout{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr 1fr}
+    #canvas{height:460px}
+  }
+  @media(max-width:560px){
+    .row{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr}
+    header h1{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Calculadora de Peso dos Biscoitos</h1>
+  <p>Cálculo por formas do rolo, giros, gramas do biscoito cru e gramas do biscoito assado</p>
+</header>
+
+<main>
+  <div class="layout">
+
+    <section class="card">
+      <h2>Entrada de produção</h2>
+
+      <label>Modo de cálculo dos giros</label>
+      <select id="modoGiro" onchange="trocarModo()">
+        <option value="total">Informar giros totais do rolo</option>
+        <option value="rpm">Calcular por RPM × tempo</option>
+      </select>
+
+      <div class="row">
+        <div>
+          <label>Total de formas no rolo</label>
+          <input id="formas" type="number" min="1" step="1" value="80">
+        </div>
+        <div id="boxGiros">
+          <label>Giros totais do rolo</label>
+          <input id="giros" type="number" min="0" step="1" value="100">
+        </div>
+      </div>
+
+      <div id="boxRpm" style="display:none;">
+        <div class="row">
+          <div>
+            <label>RPM do rolo</label>
+            <input id="rpm" type="number" min="0" step="0.1" value="25">
+          </div>
+          <div>
+            <label>Tempo de produção (min)</label>
+            <input id="tempoMin" type="number" min="0" step="0.1" value="10">
+          </div>
+        </div>
+      </div>
+
+      <h3>Peso por unidade</h3>
+      <div class="row">
+        <div>
+          <label>Gramas do biscoito cru</label>
+          <input id="gCru" type="number" min="0" step="0.01" value="8.5">
+        </div>
+        <div>
+          <label>Gramas do biscoito assado</label>
+          <input id="gAssado" type="number" min="0" step="0.01" value="7.2">
+        </div>
+      </div>
+
+      <h3>Perdas e embalagem</h3>
+      <div class="row">
+        <div>
+          <label>Perda/quebra no processo (%)</label>
+          <input id="perdaProc" type="number" min="0" max="100" step="0.1" value="2">
+        </div>
+        <div>
+          <label>Peso por pacote (g)</label>
+          <input id="pesoPacote" type="number" min="1" step="1" value="300">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Pacotes por caixa</label>
+          <input id="pacotesCaixa" type="number" min="1" step="1" value="20">
+        </div>
+        <div>
+          <label>Meta de produção assada (kg)</label>
+          <input id="metaKg" type="number" min="0" step="0.1" value="50">
+        </div>
+      </div>
+
+      <label class="check">
+        <input id="animar" type="checkbox" checked>
+        Animar rolo, esteira e forno
+      </label>
+
+      <button onclick="calcular()">Calcular produção</button>
+      <button onclick="exemploPequeno()">Exemplo linha pequena</button>
+      <button onclick="exemploIndustrial()">Exemplo industrial</button>
+
+      <div class="explain">
+        O cálculo principal é:
+        <div class="formula">unidades = formas do rolo × giros do rolo</div>
+        <div class="formula">kg cru = unidades × gramas cru ÷ 1000</div>
+        <div class="formula">kg assado = unidades × gramas assado ÷ 1000</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>Desenho animado do processo</h2>
+        <canvas id="canvas" width="1000" height="540"></canvas>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>Resultados</h2>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Total de biscoitos formados</div>
+            <div id="rUnidades" class="value">--</div>
+            <div id="rGiros" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Peso total cru</div>
+            <div id="rCru" class="value">--</div>
+            <div id="rCruDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Peso total assado</div>
+            <div id="rAssado" class="value">--</div>
+            <div id="rAssadoDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Produção boa após perdas</div>
+            <div id="rBoa" class="value">--</div>
+            <div id="rBoaDetalhe" class="small">--</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Resultado</th>
+              <th>Interpretação</th>
+            </tr>
+          </thead>
+          <tbody id="tabela"></tbody>
+        </table>
+
+        <div class="explain">
+          <strong>Como usar na fábrica:</strong><br>
+          Informe quantas cavidades/formas existem no rolo, quantas voltas ele deu e o peso médio de cada biscoito cru e assado. O programa mostra o peso total produzido, a perda de umidade no forno, a quebra do processo, quantidade de pacotes e caixas.
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  Simulador HTML + CSS + JavaScript para produção de biscoitos por rolo moldador
+</footer>
+
+<script>
+let dados = {};
+let t = 0;
+
+function n(id){
+  return Number(document.getElementById(id).value);
+}
+
+function fmt(num, casas=2){
+  if(!isFinite(num)) return "0";
+  return num.toLocaleString("pt-BR", {minimumFractionDigits: casas, maximumFractionDigits: casas});
+}
+
+function inteiro(num){
+  if(!isFinite(num)) return "0";
+  return Math.floor(num).toLocaleString("pt-BR");
+}
+
+function trocarModo(){
+  const modo = document.getElementById("modoGiro").value;
+  document.getElementById("boxGiros").style.display = modo === "total" ? "block" : "none";
+  document.getElementById("boxRpm").style.display = modo === "rpm" ? "block" : "none";
+  calcular();
+}
+
+function calcular(){
+  const modo = document.getElementById("modoGiro").value;
+  const formas = Math.max(1, n("formas"));
+  let giros = Math.max(0, n("giros"));
+
+  const rpm = Math.max(0, n("rpm"));
+  const tempoMin = Math.max(0, n("tempoMin"));
+
+  if(modo === "rpm"){
+    giros = rpm * tempoMin;
+  }
+
+  const gCru = Math.max(0, n("gCru"));
+  const gAssado = Math.max(0, n("gAssado"));
+  const perdaProc = Math.min(100, Math.max(0, n("perdaProc")));
+  const pesoPacote = Math.max(1, n("pesoPacote"));
+  const pacotesCaixa = Math.max(1, n("pacotesCaixa"));
+  const metaKg = Math.max(0, n("metaKg"));
+
+  const unidades = formas * giros;
+  const kgCru = unidades * gCru / 1000;
+  const kgAssado = unidades * gAssado / 1000;
+
+  const perdaFornoKg = Math.max(0, kgCru - kgAssado);
+  const perdaFornoPct = kgCru > 0 ? (perdaFornoKg / kgCru) * 100 : 0;
+  const rendimentoFornoPct = kgCru > 0 ? (kgAssado / kgCru) * 100 : 0;
+
+  const kgBom = kgAssado * (1 - perdaProc / 100);
+  const kgQuebra = kgAssado - kgBom;
+  const unidadesBoas = unidades * (1 - perdaProc / 100);
+
+  const pacotes = Math.floor((kgBom * 1000) / pesoPacote);
+  const kgEmpacotado = pacotes * pesoPacote / 1000;
+  const sobraKg = Math.max(0, kgBom - kgEmpacotado);
+  const caixas = Math.floor(pacotes / pacotesCaixa);
+  const pacotesSobra = pacotes % pacotesCaixa;
+
+  const faltaMeta = Math.max(0, metaKg - kgBom);
+  const sobraMeta = Math.max(0, kgBom - metaKg);
+  const girosParaMeta = (formas * gAssado * (1 - perdaProc/100)) > 0
+    ? (metaKg * 1000) / (formas * gAssado * (1 - perdaProc/100))
+    : 0;
+
+  dados = {
+    modo, formas, giros, rpm, tempoMin, gCru, gAssado, perdaProc, pesoPacote,
+    pacotesCaixa, metaKg, unidades, kgCru, kgAssado, perdaFornoKg, perdaFornoPct,
+    rendimentoFornoPct, kgBom, kgQuebra, unidadesBoas, pacotes, kgEmpacotado,
+    sobraKg, caixas, pacotesSobra, faltaMeta, sobraMeta, girosParaMeta
+  };
+
+  atualizarTela();
+}
+
+function atualizarTela(){
+  document.getElementById("rUnidades").innerHTML = inteiro(dados.unidades);
+  document.getElementById("rGiros").innerHTML = "Giros usados: " + fmt(dados.giros, 1);
+
+  document.getElementById("rCru").innerHTML = fmt(dados.kgCru, 2) + " kg";
+  document.getElementById("rCruDetalhe").innerHTML = fmt(dados.gCru, 2) + " g por unidade crua";
+
+  document.getElementById("rAssado").innerHTML = fmt(dados.kgAssado, 2) + " kg";
+  document.getElementById("rAssadoDetalhe").innerHTML = fmt(dados.gAssado, 2) + " g por unidade assada";
+
+  document.getElementById("rBoa").innerHTML = fmt(dados.kgBom, 2) + " kg";
+  document.getElementById("rBoaDetalhe").innerHTML = "Depois de " + fmt(dados.perdaProc, 1) + "% de quebra/perda";
+
+  let metaClasse = "ok";
+  let metaTexto = "Meta atingida";
+  let metaDetalhe = "Sobra de " + fmt(dados.sobraMeta, 2) + " kg acima da meta.";
+  if(dados.metaKg > 0 && dados.kgBom < dados.metaKg){
+    metaClasse = "warn";
+    metaTexto = "Falta produção";
+    metaDetalhe = "Faltam " + fmt(dados.faltaMeta, 2) + " kg para a meta.";
+  }
+
+  let perdaClasse = "ok";
+  if(dados.perdaFornoPct > 20) perdaClasse = "warn";
+  if(dados.perdaFornoPct > 35) perdaClasse = "bad";
+
+  const tabela = `
+    <tr>
+      <td>Biscoitos por giro</td>
+      <td>${inteiro(dados.formas)} unidades</td>
+      <td>Quantidade de formas/cavidades que saem a cada volta do rolo.</td>
+    </tr>
+    <tr>
+      <td>Perda no forno</td>
+      <td><span class="pill ${perdaClasse}">${fmt(dados.perdaFornoKg,2)} kg / ${fmt(dados.perdaFornoPct,1)}%</span></td>
+      <td>Diferença entre peso cru e peso assado. Normalmente representa perda de água/umidade.</td>
+    </tr>
+    <tr>
+      <td>Rendimento do forno</td>
+      <td>${fmt(dados.rendimentoFornoPct,1)}%</td>
+      <td>Quanto do peso cru permaneceu depois do assamento.</td>
+    </tr>
+    <tr>
+      <td>Perda por quebra/processo</td>
+      <td>${fmt(dados.kgQuebra,2)} kg</td>
+      <td>Desconto aplicado depois do forno para representar quebra, refugo ou perda na linha.</td>
+    </tr>
+    <tr>
+      <td>Pacotes produzidos</td>
+      <td>${inteiro(dados.pacotes)} pacotes de ${fmt(dados.pesoPacote,0)} g</td>
+      <td>Peso bom dividido pelo peso de cada pacote.</td>
+    </tr>
+    <tr>
+      <td>Caixas fechadas</td>
+      <td>${inteiro(dados.caixas)} caixas + ${inteiro(dados.pacotesSobra)} pacotes soltos</td>
+      <td>Considerando ${inteiro(dados.pacotesCaixa)} pacotes por caixa.</td>
+    </tr>
+    <tr>
+      <td>Sobra sem empacotar</td>
+      <td>${fmt(dados.sobraKg,2)} kg</td>
+      <td>Quantidade que sobrou por não completar outro pacote inteiro.</td>
+    </tr>
+    <tr>
+      <td>Meta</td>
+      <td><span class="pill ${metaClasse}">${metaTexto}</span></td>
+      <td>${metaDetalhe} Para essa meta seriam necessários aproximadamente ${fmt(dados.girosParaMeta,1)} giros.</td>
+    </tr>
+  `;
+  document.getElementById("tabela").innerHTML = tabela;
+}
+
+function desenhar(){
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+
+  t += document.getElementById("animar").checked ? 0.035 : 0;
+
+  ctx.clearRect(0,0,W,H);
+
+  if(!dados.unidades) calcular();
+
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#fffaf0");
+  grad.addColorStop(1,"#dcecff");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 24px Arial";
+  ctx.fillText("Rolo moldador → esteira → forno → pesagem", 28, 38);
+
+  ctx.font = "15px Arial";
+  ctx.fillText("Cada giro do rolo libera: " + inteiro(dados.formas) + " biscoitos", 28, 62);
+
+  drawMachine(ctx);
+  drawRoller(ctx, 170, 185, 80);
+  drawConveyor(ctx, 100, 285, 800, 70);
+  drawOven(ctx, 570, 165, 250, 150);
+  drawScale(ctx, 790, 385);
+
+  drawBiscuits(ctx);
+  drawInfoPanel(ctx, 30, 382, 330, 125);
+  drawFormulaPanel(ctx, 380, 382, 380, 125);
+
+  requestAnimationFrame(desenhar);
+}
+
+function drawMachine(ctx){
+  ctx.save();
+  ctx.fillStyle = "#4a5568";
+  roundRect(ctx, 60, 110, 235, 205, 18, true, false);
+  ctx.fillStyle = "#2d3748";
+  roundRect(ctx, 78, 128, 199, 169, 14, true, false);
+  ctx.fillStyle = "#95a3b8";
+  roundRect(ctx, 95, 145, 165, 35, 10, true, false);
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 16px Arial";
+  ctx.fillText("ROLO MOLDADOR", 104, 169);
+
+  ctx.fillStyle = "#6b7280";
+  roundRect(ctx, 105, 315, 25, 65, 6, true, false);
+  roundRect(ctx, 235, 315, 25, 65, 6, true, false);
+
+  ctx.restore();
+}
+
+function drawRoller(ctx, cx, cy, r){
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(t*2.8);
+
+  const g = ctx.createRadialGradient(-20,-20,10,0,0,r);
+  g.addColorStop(0,"#f7d88c");
+  g.addColorStop(1,"#9a642b");
+  ctx.fillStyle = g;
+  ctx.strokeStyle = "#5c3619";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(0,0,r,0,Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+
+  // cavidades do rolo
+  for(let i=0;i<16;i++){
+    const ang = i*Math.PI*2/16;
+    const rr = r*0.62;
+    const x = Math.cos(ang)*rr;
+    const y = Math.sin(ang)*rr;
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(ang);
+    ctx.fillStyle = "#6f421e";
+    ctx.strokeStyle = "#3b2412";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(0,0,14,9,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.fillStyle = "#3b2412";
+  ctx.beginPath();
+  ctx.arc(0,0,12,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.restore();
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 15px Arial";
+  ctx.fillText("Giros: " + fmt(dados.giros,1), cx-50, cy+r+28);
+}
+
+function drawConveyor(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "#2f3b4d";
+  roundRect(ctx, x, y, w, h, 18, true, false);
+
+  ctx.fillStyle = "#111827";
+  roundRect(ctx, x+18, y+15, w-36, h-30, 14, true, false);
+
+  ctx.strokeStyle = "#d1d5db";
+  ctx.lineWidth = 2;
+  for(let i=0;i<20;i++){
+    const xx = x + ((i*55 + (t*90)%55) % w);
+    ctx.beginPath();
+    ctx.moveTo(xx, y+20);
+    ctx.lineTo(xx-25, y+h-20);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "#4b5563";
+  ctx.beginPath();
+  ctx.arc(x+25,y+h/2,25,0,Math.PI*2);
+  ctx.arc(x+w-25,y+h/2,25,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawOven(ctx, x, y, w, h){
+  ctx.save();
+  const g = ctx.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0,"#7c2d12");
+  g.addColorStop(0.5,"#f97316");
+  g.addColorStop(1,"#7c2d12");
+  ctx.fillStyle = g;
+  roundRect(ctx, x, y, w, h, 20, true, false);
+
+  ctx.fillStyle = "#1f2937";
+  roundRect(ctx, x+25, y+45, w-50, h-75, 12, true, false);
+
+  for(let i=0;i<5;i++){
+    const fx = x+50+i*35;
+    const fy = y+h-25;
+    ctx.fillStyle = i%2===0 ? "#fde047" : "#fb923c";
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.quadraticCurveTo(fx+10, fy-35-Math.sin(t*7+i)*8, fx+20, fy);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "#fff7ed";
+  ctx.font = "bold 19px Arial";
+  ctx.fillText("FORNO", x+94, y+30);
+
+  ctx.fillStyle = "#ffedd5";
+  ctx.font = "13px Arial";
+  ctx.fillText("Perda de umidade: " + fmt(dados.perdaFornoPct,1) + "%", x+38, y+h+24);
+
+  ctx.restore();
+}
+
+function drawScale(ctx, x, y){
+  ctx.save();
+  ctx.fillStyle = "#475569";
+  roundRect(ctx, x, y, 150, 70, 14, true, false);
+  ctx.fillStyle = "#0f172a";
+  roundRect(ctx, x+20, y+12, 110, 32, 8, true, false);
+  ctx.fillStyle = "#86efac";
+  ctx.font = "bold 18px Consolas";
+  ctx.fillText(fmt(dados.kgBom,1) + " kg", x+33, y+34);
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 15px Arial";
+  ctx.fillText("PESAGEM FINAL", x+18, y+94);
+  ctx.restore();
+}
+
+function drawBiscuits(ctx){
+  ctx.save();
+  const count = 18;
+  for(let i=0;i<count;i++){
+    let p = ((i/count) + (t*0.18)) % 1;
+    let x = 120 + p*740;
+    let y = 315 + Math.sin(p*Math.PI*4)*5;
+
+    let raw = x < 580;
+    let cooked = x > 735;
+    let color = raw ? "#f1c27d" : "#b77935";
+    if(x >= 580 && x <= 735){
+      const k = (x-580)/(735-580);
+      color = mix("#f1c27d", "#b77935", k);
+    }
+
+    ctx.fillStyle = color;
+    ctx.strokeStyle = cooked ? "#6b3c16" : "#9c6a2f";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(x,y,18,11,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+
+    // furinhos
+    ctx.fillStyle = "rgba(80,45,15,0.35)";
+    for(let j=0;j<4;j++){
+      const ang = j*Math.PI/2 + t;
+      ctx.beginPath();
+      ctx.arc(x+Math.cos(ang)*7, y+Math.sin(ang)*4, 2, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  // biscoitos saindo do rolo
+  for(let i=0;i<5;i++){
+    const fall = ((t*1.4+i/5)%1);
+    const x = 195 + Math.sin(i)*25;
+    const y = 235 + fall*58;
+    ctx.fillStyle = "#f1c27d";
+    ctx.strokeStyle = "#9c6a2f";
+    ctx.beginPath();
+    ctx.ellipse(x,y,14,9,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawInfoPanel(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "rgba(8,17,31,.90)";
+  ctx.strokeStyle = "#f0b35b";
+  ctx.lineWidth = 2;
+  roundRect(ctx, x,y,w,h,16,true,true);
+
+  ctx.fillStyle = "#ffe0b5";
+  ctx.font = "bold 17px Arial";
+  ctx.fillText("Resumo da produção", x+16, y+27);
+
+  ctx.fillStyle = "#eaf5ff";
+  ctx.font = "14px Arial";
+  const linhas = [
+    "Unidades: " + inteiro(dados.unidades),
+    "Peso cru: " + fmt(dados.kgCru,2) + " kg",
+    "Peso assado: " + fmt(dados.kgAssado,2) + " kg",
+    "Peso bom: " + fmt(dados.kgBom,2) + " kg"
+  ];
+  linhas.forEach((l,i)=>ctx.fillText(l, x+16, y+55+i*19));
+  ctx.restore();
+}
+
+function drawFormulaPanel(ctx, x, y, w, h){
+  ctx.save();
+  ctx.fillStyle = "rgba(8,17,31,.90)";
+  ctx.strokeStyle = "#7db8ff";
+  ctx.lineWidth = 2;
+  roundRect(ctx, x,y,w,h,16,true,true);
+
+  ctx.fillStyle = "#cfe6ff";
+  ctx.font = "bold 17px Arial";
+  ctx.fillText("Cálculo usado", x+16, y+27);
+
+  ctx.fillStyle = "#ffdf93";
+  ctx.font = "14px Consolas";
+  ctx.fillText("unid = formas × giros", x+16, y+56);
+  ctx.fillText("kg cru = unid × g cru / 1000", x+16, y+78);
+  ctx.fillText("kg assado = unid × g assado / 1000", x+16, y+100);
+
+  ctx.restore();
+}
+
+function exemploPequeno(){
+  document.getElementById("modoGiro").value = "total";
+  trocarModo();
+  document.getElementById("formas").value = 60;
+  document.getElementById("giros").value = 80;
+  document.getElementById("gCru").value = 7.8;
+  document.getElementById("gAssado").value = 6.6;
+  document.getElementById("perdaProc").value = 1.5;
+  document.getElementById("pesoPacote").value = 300;
+  document.getElementById("pacotesCaixa").value = 20;
+  document.getElementById("metaKg").value = 30;
+  calcular();
+}
+
+function exemploIndustrial(){
+  document.getElementById("modoGiro").value = "rpm";
+  trocarModo();
+  document.getElementById("formas").value = 96;
+  document.getElementById("rpm").value = 32;
+  document.getElementById("tempoMin").value = 60;
+  document.getElementById("gCru").value = 9.2;
+  document.getElementById("gAssado").value = 7.5;
+  document.getElementById("perdaProc").value = 2.5;
+  document.getElementById("pesoPacote").value = 350;
+  document.getElementById("pacotesCaixa").value = 24;
+  document.getElementById("metaKg").value = 1300;
+  calcular();
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+
+function mix(c1,c2,p){
+  const a = hexToRgb(c1);
+  const b = hexToRgb(c2);
+  const r = Math.round(a.r + (b.r-a.r)*p);
+  const g = Math.round(a.g + (b.g-a.g)*p);
+  const bl = Math.round(a.b + (b.b-a.b)*p);
+  return `rgb(${r},${g},${bl})`;
+}
+
+function hexToRgb(hex){
+  const v = parseInt(hex.replace("#",""),16);
+  return {r:v>>16, g:(v>>8)&255, b:v&255};
+}
+
+document.querySelectorAll("input,select").forEach(el=>{
+  el.addEventListener("input", calcular);
+  el.addEventListener("change", calcular);
+});
+
+trocarModo();
+calcular();
+desenhar();
+</script>
+
+</body>
+</html>

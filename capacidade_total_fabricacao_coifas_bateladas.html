@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Capacidade Total de Fabricação - Coifas e Bateladas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#07111f;
+    color:#f2f7ff;
+  }
+  header{
+    background:linear-gradient(135deg,#081525,#4b2a0c,#07111f);
+    border-bottom:3px solid #f0b35b;
+    padding:24px 14px;
+    text-align:center;
+  }
+  header h1{margin:0;font-size:28px}
+  header p{margin:8px 0 0;color:#ffe0b5}
+  main{max-width:1450px;margin:auto;padding:16px}
+  .layout{
+    display:grid;
+    grid-template-columns:410px 1fr;
+    gap:16px;
+  }
+  .card{
+    background:#101b2d;
+    border:1px solid #314760;
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 0 22px rgba(0,0,0,.28);
+  }
+  h2{margin:0 0 12px;color:#ffd08a;font-size:20px}
+  h3{margin:18px 0 8px;color:#e9f2ff;font-size:16px}
+  label{
+    display:block;
+    margin-top:10px;
+    margin-bottom:4px;
+    color:#dcecff;
+    font-weight:bold;
+    font-size:14px;
+  }
+  input,select{
+    width:100%;
+    padding:11px;
+    border-radius:11px;
+    border:1px solid #46617d;
+    background:#07111f;
+    color:white;
+    outline:none;
+    font-size:15px;
+  }
+  input:focus,select:focus{border-color:#f0b35b}
+  button{
+    width:100%;
+    border:none;
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+    background:#e98725;
+    color:#111827;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:15px;
+  }
+  button:hover{background:#ffb55b}
+  .btnPrint{background:#2bb673;color:#06111f}
+  .btnPrint:hover{background:#5bf0a5}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .resultGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .metric{
+    background:#07111f;
+    border:1px solid #314760;
+    border-radius:16px;
+    padding:13px;
+    min-height:102px;
+  }
+  .metric .title{color:#b9d2ec;font-size:13px;margin-bottom:7px}
+  .metric .value{color:#fff;font-size:23px;font-weight:bold}
+  .metric .small{color:#b9d2ec;font-size:12px;margin-top:6px;line-height:1.35}
+  #canvas{
+    width:100%;
+    height:580px;
+    display:block;
+    background:linear-gradient(#fff7e8,#dcecff);
+    border:1px solid #8bb7db;
+    border-radius:18px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    overflow:hidden;
+    border-radius:12px;
+    font-size:14px;
+  }
+  th,td{
+    padding:9px;
+    border-bottom:1px solid #314760;
+    text-align:left;
+  }
+  th{background:#142a42;color:#ffe0b5}
+  td{background:#081525;color:#e8f3ff}
+  .pill{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-weight:bold;
+    color:#111827;
+  }
+  .ok{background:#83f6a5}
+  .warn{background:#ffe36d}
+  .bad{background:#ff7777}
+  .blue{background:#93c5fd}
+  .explain{
+    margin-top:12px;
+    padding:12px;
+    border-left:5px solid #e98725;
+    background:#07111f;
+    border-radius:12px;
+    color:#dcecff;
+    line-height:1.5;
+  }
+  .formula{
+    background:#091426;
+    color:#ffdf93;
+    border:1px solid #304969;
+    padding:8px;
+    border-radius:8px;
+    font-family:Consolas, monospace;
+    overflow:auto;
+    margin-top:6px;
+  }
+  .check{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    color:#cfe6ff;
+    margin-top:10px;
+    font-size:14px;
+  }
+  .check input{width:auto}
+  footer{text-align:center;padding:18px;color:#adc2d6}
+  .printOnly,.reportBox{display:none}
+  @media(max-width:1050px){
+    .layout{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr 1fr}
+    #canvas{height:500px}
+  }
+  @media(max-width:600px){
+    .row,.row3{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr}
+    header h1{font-size:22px}
+  }
+  @media print{
+    body{background:white!important;color:#111827!important}
+    header,footer,.layout{display:none!important}
+    main{max-width:100%;padding:0;margin:0}
+    .printOnly,.reportBox{display:block!important}
+    .reportBox{
+      background:white!important;
+      color:#111827!important;
+      padding:20px;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+    .reportHeader{
+      border-bottom:3px solid #111827;
+      padding-bottom:10px;
+      margin-bottom:12px;
+      text-align:center;
+    }
+    .reportHeader h1{margin:0;font-size:22px}
+    .reportHeader p{margin:4px 0;font-size:13px}
+    .reportGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .reportCard{
+      border:1px solid #333;
+      border-radius:8px;
+      padding:8px;
+      min-height:48px;
+    }
+    .reportCard strong{display:block;font-size:12px;color:#333;margin-bottom:4px}
+    .reportCard span{font-size:16px;font-weight:bold}
+    .reportTable{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      font-size:12px;
+    }
+    .reportTable th,.reportTable td{
+      border:1px solid #333;
+      padding:7px;
+      color:#111827!important;
+      background:white!important;
+    }
+    .reportTable th{background:#eeeeee!important}
+    .assinaturas{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:40px;
+      margin-top:50px;
+      font-size:12px;
+    }
+    .linhaAss{
+      border-top:1px solid #111827;
+      text-align:center;
+      padding-top:6px;
+    }
+    @page{size:A4;margin:12mm}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Capacidade Total de Fabricação</h1>
+  <p>Cálculo em kg pela capacidade das coifas/fornos/linhas e pelas bateladas de massa</p>
+</header>
+
+<main>
+  <div class="layout">
+    <section class="card">
+      <h2>Entrada de dados</h2>
+
+      <h3>Relatório</h3>
+      <div class="row">
+        <div>
+          <label>Produto</label>
+          <input id="produto" value="Biscoito">
+        </div>
+        <div>
+          <label>Lote / OP</label>
+          <input id="lote" value="OP-001">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Operador</label>
+          <input id="operador" value="">
+        </div>
+        <div>
+          <label>Turno</label>
+          <input id="turno" value="1º Turno">
+        </div>
+      </div>
+
+      <h3>Bateladas de massa</h3>
+      <div class="row">
+        <div>
+          <label>Quantidade de masseiras</label>
+          <input id="qtdMasseiras" type="number" min="1" step="1" value="2">
+        </div>
+        <div>
+          <label>Kg por batelada</label>
+          <input id="kgBatelada" type="number" min="0.1" step="0.1" value="250">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tempo de 1 batelada (min)</label>
+          <input id="tempoBatelada" type="number" min="0.1" step="0.1" value="18">
+        </div>
+        <div>
+          <label>Tempo útil do turno (horas)</label>
+          <input id="horasTurno" type="number" min="0.1" step="0.1" value="8">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Eficiência da massa (%)</label>
+          <input id="efMassa" type="number" min="1" max="100" step="1" value="88">
+        </div>
+        <div>
+          <label>Perda na massa/preparo (%)</label>
+          <input id="perdaMassa" type="number" min="0" max="100" step="0.1" value="1.5">
+        </div>
+      </div>
+
+      <h3>Coifas / fornos / linhas</h3>
+      <div class="row">
+        <div>
+          <label>Total de coifas/fornos/linhas</label>
+          <input id="qtdCoifas" type="number" min="1" step="1" value="3">
+        </div>
+        <div>
+          <label>Capacidade por coifa (kg/h)</label>
+          <input id="kgHoraCoifa" type="number" min="0.1" step="0.1" value="180">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Eficiência das coifas (%)</label>
+          <input id="efCoifa" type="number" min="1" max="100" step="1" value="85">
+        </div>
+        <div>
+          <label>Perda no forno/coifa (%)</label>
+          <input id="perdaCoifa" type="number" min="0" max="100" step="0.1" value="8">
+        </div>
+      </div>
+
+      <h3>Acabamento e embalagem</h3>
+      <div class="row">
+        <div>
+          <label>Perda geral final (%)</label>
+          <input id="perdaFinal" type="number" min="0" max="100" step="0.1" value="2">
+        </div>
+        <div>
+          <label>Peso por pacote (g)</label>
+          <input id="pesoPacote" type="number" min="1" step="1" value="300">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Pacotes por caixa</label>
+          <input id="pacotesCaixa" type="number" min="1" step="1" value="20">
+        </div>
+        <div>
+          <label>Dias de produção</label>
+          <input id="dias" type="number" min="1" step="1" value="1">
+        </div>
+      </div>
+
+      <h3>Meta</h3>
+      <div class="row">
+        <div>
+          <label>Meta final por turno (kg)</label>
+          <input id="metaKg" type="number" min="0" step="0.1" value="2500">
+        </div>
+        <div>
+          <label>Fator de segurança (%)</label>
+          <input id="fs" type="number" min="0" max="50" step="1" value="10">
+        </div>
+      </div>
+
+      <label class="check">
+        <input id="animar" type="checkbox" checked>
+        Animar bateladas, coifas e fluxo de kg
+      </label>
+
+      <button onclick="calcular()">Calcular capacidade total</button>
+      <button class="btnPrint" onclick="imprimirRelatorio()">Imprimir relatório</button>
+      <button onclick="exemploEquilibrado()">Exemplo equilibrado</button>
+      <button onclick="exemploGargaloCoifa()">Exemplo gargalo nas coifas</button>
+
+      <div class="explain">
+        A capacidade real da fabricação é o menor valor entre o que a massa consegue preparar e o que as coifas/fornos conseguem processar.
+        <div class="formula">capacidade real = menor valor entre bateladas e coifas</div>
+        <div class="formula">kg final = capacidade real × perdas do forno × perdas finais</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>Animação da fábrica</h2>
+        <canvas id="canvas" width="1060" height="580"></canvas>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>Resultados principais</h2>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Capacidade pelas bateladas</div>
+            <div id="rBatelada" class="value">--</div>
+            <div id="rBateladaDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Capacidade pelas coifas</div>
+            <div id="rCoifa" class="value">--</div>
+            <div id="rCoifaDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Fabricação suportada</div>
+            <div id="rReal" class="value">--</div>
+            <div id="rRealDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Produção final boa</div>
+            <div id="rFinal" class="value">--</div>
+            <div id="rFinalDetalhe" class="small">--</div>
+          </div>
+        </div>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Gargalo</div>
+            <div id="rGargalo" class="value">--</div>
+            <div id="rGargaloDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Pacotes</div>
+            <div id="rPacotes" class="value">--</div>
+            <div id="rPacotesDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Caixas</div>
+            <div id="rCaixas" class="value">--</div>
+            <div id="rCaixasDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Meta</div>
+            <div id="rMeta" class="value">--</div>
+            <div id="rMetaDetalhe" class="small">--</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Resultado</th>
+              <th>Interpretação</th>
+            </tr>
+          </thead>
+          <tbody id="tabela"></tbody>
+        </table>
+
+        <div class="explain">
+          <strong>Leitura industrial:</strong><br>
+          Se as bateladas produzem mais massa do que as coifas processam, o gargalo está nas coifas/fornos. Se as coifas suportam mais do que a massa preparada, o gargalo está na preparação da massa.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section id="relatorioImpressao" class="printOnly reportBox">
+    <div class="reportHeader">
+      <h1>RELATÓRIO DE CAPACIDADE TOTAL DE FABRICAÇÃO</h1>
+      <p>Capacidade em kg por bateladas, coifas/fornos/linhas e perdas do processo</p>
+      <p id="repData">Data: --</p>
+    </div>
+
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Produto</strong><span id="repProduto">--</span></div>
+      <div class="reportCard"><strong>Lote / OP</strong><span id="repLote">--</span></div>
+      <div class="reportCard"><strong>Operador</strong><span id="repOperador">--</span></div>
+      <div class="reportCard"><strong>Turno</strong><span id="repTurno">--</span></div>
+    </div>
+
+    <h2 style="color:#111827;margin-top:16px;">Resumo calculado</h2>
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Bateladas</strong><span id="repBatelada">--</span></div>
+      <div class="reportCard"><strong>Coifas</strong><span id="repCoifa">--</span></div>
+      <div class="reportCard"><strong>Capacidade suportada</strong><span id="repReal">--</span></div>
+      <div class="reportCard"><strong>Produção final boa</strong><span id="repFinal">--</span></div>
+      <div class="reportCard"><strong>Gargalo</strong><span id="repGargalo">--</span></div>
+      <div class="reportCard"><strong>Pacotes</strong><span id="repPacotes">--</span></div>
+      <div class="reportCard"><strong>Caixas</strong><span id="repCaixas">--</span></div>
+      <div class="reportCard"><strong>Meta</strong><span id="repMeta">--</span></div>
+    </div>
+
+    <table class="reportTable">
+      <thead>
+        <tr>
+          <th>Parâmetro</th>
+          <th>Valor</th>
+          <th>Resultado / observação</th>
+        </tr>
+      </thead>
+      <tbody id="repTabela"></tbody>
+    </table>
+
+    <h2 style="color:#111827;margin-top:16px;">Fórmulas utilizadas</h2>
+    <table class="reportTable">
+      <tbody>
+        <tr><td>Bateladas por turno</td><td>masseiras × tempo útil em minutos ÷ tempo de 1 batelada × eficiência</td></tr>
+        <tr><td>Kg pelas bateladas</td><td>bateladas por turno × kg por batelada × perdas de massa</td></tr>
+        <tr><td>Kg pelas coifas</td><td>coifas × kg/h por coifa × horas do turno × eficiência</td></tr>
+        <tr><td>Capacidade suportada</td><td>menor valor entre bateladas e coifas</td></tr>
+        <tr><td>Produção final boa</td><td>capacidade suportada × perdas de coifa/forno × perda final</td></tr>
+      </tbody>
+    </table>
+
+    <div class="assinaturas">
+      <div class="linhaAss">Assinatura do operador</div>
+      <div class="linhaAss">Conferência / responsável</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Simulador HTML + CSS + JavaScript para calcular quanto a fabricação suporta em kg por coifas e bateladas
+</footer>
+
+<script>
+let dados = {};
+let t = 0;
+
+function n(id){ return Number(document.getElementById(id).value); }
+function v(id){ return (document.getElementById(id).value || "").trim(); }
+
+function fmt(num, casas=2){
+  if(!isFinite(num)) return "0";
+  return num.toLocaleString("pt-BR", {minimumFractionDigits: casas, maximumFractionDigits: casas});
+}
+
+function inteiro(num){
+  if(!isFinite(num)) return "0";
+  return Math.floor(num).toLocaleString("pt-BR");
+}
+
+function txt(id, valor){
+  document.getElementById(id).innerHTML = valor;
+}
+
+function calcular(){
+  const qtdMasseiras = Math.max(1, n("qtdMasseiras"));
+  const kgBatelada = Math.max(0.1, n("kgBatelada"));
+  const tempoBatelada = Math.max(0.1, n("tempoBatelada"));
+  const horasTurno = Math.max(0.1, n("horasTurno"));
+  const efMassa = Math.min(100, Math.max(1, n("efMassa")));
+  const perdaMassa = Math.min(100, Math.max(0, n("perdaMassa")));
+
+  const qtdCoifas = Math.max(1, n("qtdCoifas"));
+  const kgHoraCoifa = Math.max(0.1, n("kgHoraCoifa"));
+  const efCoifa = Math.min(100, Math.max(1, n("efCoifa")));
+  const perdaCoifa = Math.min(100, Math.max(0, n("perdaCoifa")));
+
+  const perdaFinal = Math.min(100, Math.max(0, n("perdaFinal")));
+  const pesoPacote = Math.max(1, n("pesoPacote"));
+  const pacotesCaixa = Math.max(1, n("pacotesCaixa"));
+  const dias = Math.max(1, n("dias"));
+  const metaKg = Math.max(0, n("metaKg"));
+  const fs = Math.min(50, Math.max(0, n("fs")));
+
+  const tempoUtilMin = horasTurno * 60;
+  const bateladasTeoricas = qtdMasseiras * tempoUtilMin / tempoBatelada;
+  const bateladasEfetivas = bateladasTeoricas * (efMassa / 100);
+  const kgMassaBruta = bateladasEfetivas * kgBatelada;
+  const kgMassaLiquida = kgMassaBruta * (1 - perdaMassa / 100);
+
+  const kgCoifaBruta = qtdCoifas * kgHoraCoifa * horasTurno;
+  const kgCoifaEfetiva = kgCoifaBruta * (efCoifa / 100);
+
+  const capacidadeSuportada = Math.min(kgMassaLiquida, kgCoifaEfetiva);
+  const gargalo = kgMassaLiquida < kgCoifaEfetiva ? "Bateladas / massa" : kgCoifaEfetiva < kgMassaLiquida ? "Coifas / fornos" : "Equilibrado";
+  const sobraMassa = Math.max(0, kgMassaLiquida - kgCoifaEfetiva);
+  const sobraCoifa = Math.max(0, kgCoifaEfetiva - kgMassaLiquida);
+
+  const kgDepoisCoifa = capacidadeSuportada * (1 - perdaCoifa / 100);
+  const kgFinalBom = kgDepoisCoifa * (1 - perdaFinal / 100);
+  const kgFinalComSeguranca = kgFinalBom * (1 - fs / 100);
+  const kgDia = kgFinalBom * dias;
+
+  const pacotes = Math.floor((kgFinalBom * 1000) / pesoPacote);
+  const caixas = Math.floor(pacotes / pacotesCaixa);
+  const pacotesSoltos = pacotes % pacotesCaixa;
+  const sobraKgPacote = Math.max(0, kgFinalBom - (pacotes * pesoPacote / 1000));
+
+  const atingiuMeta = kgFinalBom >= metaKg;
+  const faltaMeta = Math.max(0, metaKg - kgFinalBom);
+  const sobraMeta = Math.max(0, kgFinalBom - metaKg);
+
+  const utilizacaoCoifa = kgCoifaEfetiva > 0 ? capacidadeSuportada / kgCoifaEfetiva * 100 : 0;
+  const utilizacaoMassa = kgMassaLiquida > 0 ? capacidadeSuportada / kgMassaLiquida * 100 : 0;
+
+  dados = {
+    qtdMasseiras, kgBatelada, tempoBatelada, horasTurno, efMassa, perdaMassa,
+    qtdCoifas, kgHoraCoifa, efCoifa, perdaCoifa, perdaFinal, pesoPacote,
+    pacotesCaixa, dias, metaKg, fs, tempoUtilMin, bateladasTeoricas,
+    bateladasEfetivas, kgMassaBruta, kgMassaLiquida, kgCoifaBruta,
+    kgCoifaEfetiva, capacidadeSuportada, gargalo, sobraMassa, sobraCoifa,
+    kgDepoisCoifa, kgFinalBom, kgFinalComSeguranca, kgDia, pacotes, caixas,
+    pacotesSoltos, sobraKgPacote, atingiuMeta, faltaMeta, sobraMeta,
+    utilizacaoCoifa, utilizacaoMassa
+  };
+
+  atualizarTela();
+}
+
+function atualizarTela(){
+  txt("rBatelada", fmt(dados.kgMassaLiquida,1) + " kg");
+  txt("rBateladaDetalhe", fmt(dados.bateladasEfetivas,1) + " bateladas efetivas no turno");
+
+  txt("rCoifa", fmt(dados.kgCoifaEfetiva,1) + " kg");
+  txt("rCoifaDetalhe", dados.qtdCoifas + " coifas × " + fmt(dados.kgHoraCoifa,1) + " kg/h × " + fmt(dados.efCoifa,0) + "%");
+
+  txt("rReal", fmt(dados.capacidadeSuportada,1) + " kg");
+  txt("rRealDetalhe", "Menor valor entre massa e coifas");
+
+  txt("rFinal", fmt(dados.kgFinalBom,1) + " kg");
+  txt("rFinalDetalhe", "Com segurança: " + fmt(dados.kgFinalComSeguranca,1) + " kg | Em " + dados.dias + " dia(s): " + fmt(dados.kgDia,1) + " kg");
+
+  let classeG = dados.gargalo === "Equilibrado" ? "ok" : "warn";
+  txt("rGargalo", "<span class='pill " + classeG + "'>" + dados.gargalo + "</span>");
+  txt("rGargaloDetalhe",
+    dados.gargalo === "Coifas / fornos"
+      ? "Sobra massa de " + fmt(dados.sobraMassa,1) + " kg que as coifas não conseguem processar."
+      : dados.gargalo === "Bateladas / massa"
+        ? "Sobra capacidade de coifa de " + fmt(dados.sobraCoifa,1) + " kg."
+        : "Massa e coifas estão equilibradas."
+  );
+
+  txt("rPacotes", inteiro(dados.pacotes));
+  txt("rPacotesDetalhe", "Sobra sem pacote: " + fmt(dados.sobraKgPacote,2) + " kg");
+
+  txt("rCaixas", inteiro(dados.caixas));
+  txt("rCaixasDetalhe", inteiro(dados.pacotesSoltos) + " pacotes soltos");
+
+  txt("rMeta", dados.atingiuMeta ? "<span class='pill ok'>ATINGIDA</span>" : "<span class='pill bad'>NÃO ATINGIU</span>");
+  txt("rMetaDetalhe", dados.atingiuMeta ? "Sobra " + fmt(dados.sobraMeta,1) + " kg" : "Faltam " + fmt(dados.faltaMeta,1) + " kg");
+
+  let tabela = `
+    <tr>
+      <td>Bateladas teóricas</td>
+      <td>${fmt(dados.bateladasTeoricas,2)}</td>
+      <td>Quantidade máxima se todas as masseiras trabalhassem sem perdas de eficiência.</td>
+    </tr>
+    <tr>
+      <td>Bateladas efetivas</td>
+      <td>${fmt(dados.bateladasEfetivas,2)}</td>
+      <td>Aplicando eficiência de massa de ${fmt(dados.efMassa,0)}%.</td>
+    </tr>
+    <tr>
+      <td>Kg bruto pela massa</td>
+      <td>${fmt(dados.kgMassaBruta,2)} kg</td>
+      <td>Antes da perda de preparo/massa.</td>
+    </tr>
+    <tr>
+      <td>Kg líquido pela massa</td>
+      <td>${fmt(dados.kgMassaLiquida,2)} kg</td>
+      <td>Após perda de massa de ${fmt(dados.perdaMassa,1)}%.</td>
+    </tr>
+    <tr>
+      <td>Kg bruto pelas coifas</td>
+      <td>${fmt(dados.kgCoifaBruta,2)} kg</td>
+      <td>Capacidade nominal: ${dados.qtdCoifas} coifas × ${fmt(dados.kgHoraCoifa,1)} kg/h × ${fmt(dados.horasTurno,1)} h.</td>
+    </tr>
+    <tr>
+      <td>Kg efetivo pelas coifas</td>
+      <td>${fmt(dados.kgCoifaEfetiva,2)} kg</td>
+      <td>Aplicando eficiência das coifas de ${fmt(dados.efCoifa,0)}%.</td>
+    </tr>
+    <tr>
+      <td>Capacidade real suportada</td>
+      <td>${fmt(dados.capacidadeSuportada,2)} kg</td>
+      <td>Menor valor entre bateladas e coifas.</td>
+    </tr>
+    <tr>
+      <td>Perda no forno/coifa</td>
+      <td>${fmt(dados.perdaCoifa,1)}%</td>
+      <td>Após essa perda: ${fmt(dados.kgDepoisCoifa,2)} kg.</td>
+    </tr>
+    <tr>
+      <td>Perda final geral</td>
+      <td>${fmt(dados.perdaFinal,1)}%</td>
+      <td>Produção final boa: ${fmt(dados.kgFinalBom,2)} kg.</td>
+    </tr>
+    <tr>
+      <td>Utilização das coifas</td>
+      <td>${fmt(dados.utilizacaoCoifa,1)}%</td>
+      <td>Quanto da capacidade das coifas está sendo usada.</td>
+    </tr>
+    <tr>
+      <td>Utilização da massa</td>
+      <td>${fmt(dados.utilizacaoMassa,1)}%</td>
+      <td>Quanto da capacidade de massa está sendo usada.</td>
+    </tr>
+    <tr>
+      <td>Produção com fator de segurança</td>
+      <td>${fmt(dados.kgFinalComSeguranca,2)} kg</td>
+      <td>Desconto de segurança de ${fmt(dados.fs,0)}% para planejamento.</td>
+    </tr>
+    <tr>
+      <td>Pacotes e caixas</td>
+      <td>${inteiro(dados.pacotes)} pacotes / ${inteiro(dados.caixas)} caixas</td>
+      <td>${inteiro(dados.pacotesSoltos)} pacotes soltos, pacote de ${fmt(dados.pesoPacote,0)} g.</td>
+    </tr>
+  `;
+  document.getElementById("tabela").innerHTML = tabela;
+}
+
+function desenhar(){
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+
+  t += document.getElementById("animar").checked ? 0.035 : 0;
+  ctx.clearRect(0,0,W,H);
+  if(!dados.kgFinalBom) calcular();
+
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#fff8ea");
+  grad.addColorStop(1,"#dcecff");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 24px Arial";
+  ctx.fillText("Fluxo da fabricação: bateladas → coifas/fornos → produto final", 28, 38);
+
+  ctx.font = "15px Arial";
+  ctx.fillText("Capacidade real suportada: " + fmt(dados.capacidadeSuportada,1) + " kg | Gargalo: " + dados.gargalo, 28, 62);
+
+  drawMasseiras(ctx, 55, 115, 285, 185);
+  drawFlowArrow(ctx, 355, 198, 470, 198, "#f0b35b");
+  drawCoifas(ctx, 485, 100, 320, 220);
+  drawFlowArrow(ctx, 820, 198, 930, 198, "#58b7ff");
+  drawFinal(ctx, 925, 120, 110, 170);
+
+  drawConveyor(ctx, 70, 350, 900, 60);
+  drawKgParticles(ctx);
+
+  drawPanel(ctx, 38, 450, 305, 105, "Bateladas", [
+    "Masseiras: " + dados.qtdMasseiras,
+    "Bateladas efetivas: " + fmt(dados.bateladasEfetivas,1),
+    "Capacidade: " + fmt(dados.kgMassaLiquida,1) + " kg"
+  ], "#f0b35b");
+
+  drawPanel(ctx, 375, 450, 305, 105, "Coifas / Fornos", [
+    "Quantidade: " + dados.qtdCoifas,
+    "Capacidade: " + fmt(dados.kgCoifaEfetiva,1) + " kg",
+    "Utilização: " + fmt(dados.utilizacaoCoifa,1) + "%"
+  ], "#58b7ff");
+
+  drawPanel(ctx, 712, 450, 305, 105, "Produção Final", [
+    "Final boa: " + fmt(dados.kgFinalBom,1) + " kg",
+    "Pacotes: " + inteiro(dados.pacotes),
+    "Caixas: " + inteiro(dados.caixas)
+  ], "#58f2a1");
+
+  requestAnimationFrame(desenhar);
+}
+
+function drawMasseiras(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle = "#475569";
+  roundRect(ctx,x,y,w,h,22,true,false);
+  ctx.fillStyle = "#eaf5ff";
+  ctx.font = "bold 18px Arial";
+  ctx.fillText("MASSEIRAS / BATELADAS", x+32, y+28);
+
+  const qtd = Math.min(4, dados.qtdMasseiras);
+  for(let i=0;i<qtd;i++){
+    const mx = x+25+i*(w-50)/qtd;
+    const mw = (w-70)/qtd;
+    ctx.fillStyle = "#1f2937";
+    roundRect(ctx, mx, y+55, mw, 95, 14, true, false);
+    ctx.fillStyle = "#d9a75d";
+    ctx.beginPath();
+    ctx.ellipse(mx+mw/2, y+125+Math.sin(t*3+i)*3, mw*0.32, 18, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(mx+mw/2,y+95);
+    ctx.rotate(t*5+i);
+    ctx.strokeStyle="#d1d5db";
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.moveTo(-18,0);
+    ctx.lineTo(18,0);
+    ctx.moveTo(0,-14);
+    ctx.lineTo(0,14);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle="#eaf5ff";
+    ctx.font="bold 12px Arial";
+    ctx.fillText("M"+(i+1), mx+mw/2-9, y+168);
+  }
+  ctx.restore();
+}
+
+function drawCoifas(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle = "#7c2d12";
+  roundRect(ctx,x,y,w,h,22,true,false);
+  ctx.fillStyle="#fff7ed";
+  ctx.font="bold 18px Arial";
+  ctx.fillText("COIFAS / FORNOS / LINHAS", x+35, y+28);
+
+  const qtd = Math.min(5, dados.qtdCoifas);
+  for(let i=0;i<qtd;i++){
+    const cx = x+25+i*(w-50)/qtd;
+    const cw = (w-70)/qtd;
+    ctx.fillStyle="#1f2937";
+    roundRect(ctx,cx,y+55,cw,95,12,true,false);
+
+    for(let f=0;f<3;f++){
+      const fx = cx+cw/2-12+f*10;
+      const fy = y+135;
+      ctx.fillStyle = f%2===0 ? "#fde047" : "#fb923c";
+      ctx.beginPath();
+      ctx.moveTo(fx,fy);
+      ctx.quadraticCurveTo(fx+7,fy-30-Math.sin(t*7+i+f)*6,fx+15,fy);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    ctx.fillStyle="#fff7ed";
+    ctx.font="bold 12px Arial";
+    ctx.fillText("C"+(i+1), cx+cw/2-9, y+170);
+  }
+  ctx.restore();
+}
+
+function drawFinal(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="#14532d";
+  roundRect(ctx,x,y,w,h,20,true,false);
+  ctx.fillStyle="#bbf7d0";
+  ctx.font="bold 16px Arial";
+  ctx.fillText("FINAL", x+30, y+28);
+
+  for(let i=0;i<4;i++){
+    const py = y+52+i*28;
+    ctx.fillStyle="#fbbf24";
+    roundRect(ctx,x+30,py,55,20,5,true,false);
+    ctx.fillStyle="#111827";
+    ctx.font="bold 10px Arial";
+    ctx.fillText("PACOTE", x+38, py+14);
+  }
+  ctx.restore();
+}
+
+function drawConveyor(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="#334155";
+  roundRect(ctx,x,y,w,h,18,true,false);
+  ctx.fillStyle="#111827";
+  roundRect(ctx,x+18,y+15,w-36,h-30,14,true,false);
+  ctx.strokeStyle="#d1d5db";
+  ctx.lineWidth=2;
+  for(let i=0;i<25;i++){
+    const xx=x+((i*50+(t*95)%50)%w);
+    ctx.beginPath();
+    ctx.moveTo(xx,y+18);
+    ctx.lineTo(xx-22,y+h-18);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawKgParticles(ctx){
+  ctx.save();
+  for(let i=0;i<18;i++){
+    const p = ((i/18)+t*0.13)%1;
+    const x = 90 + p*860;
+    const y = 378 + Math.sin(p*12+t)*5;
+    let color = x < 470 ? "#d9a75d" : x < 830 ? "#b77935" : "#fbbf24";
+    ctx.fillStyle=color;
+    ctx.strokeStyle="#6b3c16";
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.ellipse(x,y,18,11,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle="#111827";
+    ctx.font="bold 9px Arial";
+    if(x > 830) ctx.fillText("KG", x-7, y+3);
+  }
+  ctx.restore();
+}
+
+function drawFlowArrow(ctx,x1,y1,x2,y2,color){
+  ctx.save();
+  ctx.strokeStyle=color;
+  ctx.fillStyle=color;
+  ctx.lineWidth=5;
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+  const ang=Math.atan2(y2-y1,x2-x1);
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-16*Math.cos(ang-Math.PI/6),y2-16*Math.sin(ang-Math.PI/6));
+  ctx.lineTo(x2-16*Math.cos(ang+Math.PI/6),y2-16*Math.sin(ang+Math.PI/6));
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawPanel(ctx,x,y,w,h,title,lines,color){
+  ctx.save();
+  ctx.fillStyle="rgba(8,17,31,.92)";
+  ctx.strokeStyle=color;
+  ctx.lineWidth=2;
+  roundRect(ctx,x,y,w,h,16,true,true);
+  ctx.fillStyle=color;
+  ctx.font="bold 17px Arial";
+  ctx.fillText(title,x+16,y+27);
+  ctx.fillStyle="#eaf5ff";
+  ctx.font="14px Arial";
+  lines.forEach((l,i)=>ctx.fillText(l,x+16,y+55+i*20));
+  ctx.restore();
+}
+
+function atualizarRelatorio(){
+  calcular();
+  txt("repData","Data de emissão: " + new Date().toLocaleString("pt-BR"));
+  txt("repProduto", v("produto") || "-");
+  txt("repLote", v("lote") || "-");
+  txt("repOperador", v("operador") || "-");
+  txt("repTurno", v("turno") || "-");
+  txt("repBatelada", fmt(dados.kgMassaLiquida,1) + " kg");
+  txt("repCoifa", fmt(dados.kgCoifaEfetiva,1) + " kg");
+  txt("repReal", fmt(dados.capacidadeSuportada,1) + " kg");
+  txt("repFinal", fmt(dados.kgFinalBom,1) + " kg");
+  txt("repGargalo", dados.gargalo);
+  txt("repPacotes", inteiro(dados.pacotes));
+  txt("repCaixas", inteiro(dados.caixas));
+  txt("repMeta", dados.atingiuMeta ? "Atingida" : "Não atingiu");
+
+  const tabela = `
+    <tr><td>Masseiras</td><td>${inteiro(dados.qtdMasseiras)}</td><td>${fmt(dados.kgBatelada,1)} kg por batelada.</td></tr>
+    <tr><td>Tempo de batelada</td><td>${fmt(dados.tempoBatelada,1)} min</td><td>Tempo útil do turno: ${fmt(dados.horasTurno,1)} horas.</td></tr>
+    <tr><td>Bateladas efetivas</td><td>${fmt(dados.bateladasEfetivas,2)}</td><td>Eficiência da massa: ${fmt(dados.efMassa,0)}%.</td></tr>
+    <tr><td>Capacidade pela massa</td><td>${fmt(dados.kgMassaLiquida,2)} kg</td><td>Após perda de preparo de ${fmt(dados.perdaMassa,1)}%.</td></tr>
+    <tr><td>Coifas/fornos/linhas</td><td>${inteiro(dados.qtdCoifas)}</td><td>${fmt(dados.kgHoraCoifa,1)} kg/h por coifa.</td></tr>
+    <tr><td>Capacidade pelas coifas</td><td>${fmt(dados.kgCoifaEfetiva,2)} kg</td><td>Eficiência das coifas: ${fmt(dados.efCoifa,0)}%.</td></tr>
+    <tr><td>Capacidade suportada</td><td>${fmt(dados.capacidadeSuportada,2)} kg</td><td>Menor valor entre massa e coifas.</td></tr>
+    <tr><td>Gargalo</td><td>${dados.gargalo}</td><td>${dados.gargalo === "Coifas / fornos" ? "As coifas limitam a produção." : dados.gargalo === "Bateladas / massa" ? "A massa limita a produção." : "Sistema equilibrado."}</td></tr>
+    <tr><td>Produção final boa</td><td>${fmt(dados.kgFinalBom,2)} kg</td><td>Após perda de coifa ${fmt(dados.perdaCoifa,1)}% e perda final ${fmt(dados.perdaFinal,1)}%.</td></tr>
+    <tr><td>Produção com segurança</td><td>${fmt(dados.kgFinalComSeguranca,2)} kg</td><td>Aplicado fator de segurança de ${fmt(dados.fs,0)}%.</td></tr>
+    <tr><td>Pacotes e caixas</td><td>${inteiro(dados.pacotes)} pacotes</td><td>${inteiro(dados.caixas)} caixas + ${inteiro(dados.pacotesSoltos)} pacotes soltos.</td></tr>
+  `;
+  document.getElementById("repTabela").innerHTML = tabela;
+}
+
+function imprimirRelatorio(){
+  atualizarRelatorio();
+  setTimeout(()=>window.print(),200);
+}
+
+function exemploEquilibrado(){
+  document.getElementById("produto").value = "Biscoito linha padrão";
+  document.getElementById("lote").value = "OP-EQ-001";
+  document.getElementById("qtdMasseiras").value = 2;
+  document.getElementById("kgBatelada").value = 250;
+  document.getElementById("tempoBatelada").value = 18;
+  document.getElementById("horasTurno").value = 8;
+  document.getElementById("efMassa").value = 88;
+  document.getElementById("perdaMassa").value = 1.5;
+  document.getElementById("qtdCoifas").value = 3;
+  document.getElementById("kgHoraCoifa").value = 180;
+  document.getElementById("efCoifa").value = 85;
+  document.getElementById("perdaCoifa").value = 8;
+  document.getElementById("perdaFinal").value = 2;
+  document.getElementById("pesoPacote").value = 300;
+  document.getElementById("pacotesCaixa").value = 20;
+  document.getElementById("metaKg").value = 2500;
+  calcular();
+}
+
+function exemploGargaloCoifa(){
+  document.getElementById("produto").value = "Biscoito - gargalo coifa";
+  document.getElementById("lote").value = "OP-COIFA-001";
+  document.getElementById("qtdMasseiras").value = 3;
+  document.getElementById("kgBatelada").value = 280;
+  document.getElementById("tempoBatelada").value = 15;
+  document.getElementById("horasTurno").value = 8;
+  document.getElementById("efMassa").value = 92;
+  document.getElementById("perdaMassa").value = 1.2;
+  document.getElementById("qtdCoifas").value = 2;
+  document.getElementById("kgHoraCoifa").value = 160;
+  document.getElementById("efCoifa").value = 80;
+  document.getElementById("perdaCoifa").value = 9;
+  document.getElementById("perdaFinal").value = 2.5;
+  document.getElementById("pesoPacote").value = 300;
+  document.getElementById("pacotesCaixa").value = 20;
+  document.getElementById("metaKg").value = 2200;
+  calcular();
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+
+document.querySelectorAll("input,select").forEach(el=>{
+  el.addEventListener("input",calcular);
+  el.addEventListener("change",calcular);
+});
+
+calcular();
+desenhar();
+</script>
+</body>
+</html>

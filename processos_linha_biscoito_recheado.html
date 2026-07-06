@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Simulador de Linha de Biscoito e Biscoito Recheado</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:#07111f;
+    color:#f2f7ff;
+  }
+  header{
+    background:linear-gradient(135deg,#0b1b31,#5d3415,#0b1324);
+    border-bottom:3px solid #f0b35b;
+    text-align:center;
+    padding:24px 14px;
+  }
+  header h1{margin:0;font-size:28px}
+  header p{margin:8px 0 0;color:#ffe0b5}
+  main{max-width:1500px;margin:auto;padding:16px}
+  .layout{
+    display:grid;
+    grid-template-columns:410px 1fr;
+    gap:16px;
+  }
+  .card{
+    background:#101b2d;
+    border:1px solid #314760;
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 0 22px rgba(0,0,0,.30);
+  }
+  h2{margin:0 0 12px;font-size:20px;color:#ffd08a}
+  h3{margin:18px 0 8px;font-size:16px;color:#e9f2ff}
+  label{
+    display:block;
+    margin-top:10px;
+    margin-bottom:4px;
+    font-size:14px;
+    font-weight:bold;
+    color:#dcecff;
+  }
+  input,select{
+    width:100%;
+    padding:11px;
+    border-radius:11px;
+    border:1px solid #46617d;
+    background:#07111f;
+    color:white;
+    outline:none;
+    font-size:15px;
+  }
+  input:focus,select:focus{border-color:#f0b35b}
+  button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#e98725;
+    color:#111827;
+    font-weight:bold;
+    margin-top:12px;
+    cursor:pointer;
+    font-size:15px;
+  }
+  button:hover{background:#ffb55b}
+  .btnPrint{background:#2bb673;color:#06111f}
+  .btnPrint:hover{background:#5bf0a5}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .check{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    color:#cfe6ff;
+    margin-top:10px;
+    font-size:14px;
+  }
+  .check input{width:auto}
+  .resultGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .metric{
+    background:#07111f;
+    border:1px solid #314760;
+    border-radius:16px;
+    padding:13px;
+    min-height:100px;
+  }
+  .metric .title{color:#b9d2ec;font-size:13px;margin-bottom:7px}
+  .metric .value{color:#fff;font-size:23px;font-weight:bold}
+  .metric .small{color:#b9d2ec;font-size:12px;margin-top:6px;line-height:1.3}
+  #canvas{
+    width:100%;
+    height:620px;
+    display:block;
+    background:linear-gradient(#fff7e8,#dfefff);
+    border:1px solid #8bb7db;
+    border-radius:18px;
+  }
+  .explain{
+    background:#07111f;
+    border-left:5px solid #e98725;
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+    color:#dcecff;
+    line-height:1.5;
+  }
+  .formula{
+    background:#091426;
+    color:#ffdf93;
+    border:1px solid #304969;
+    padding:8px;
+    border-radius:8px;
+    font-family:Consolas, monospace;
+    overflow:auto;
+    margin-top:6px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    overflow:hidden;
+    border-radius:12px;
+    font-size:14px;
+  }
+  th,td{
+    padding:9px;
+    border-bottom:1px solid #314760;
+    text-align:left;
+  }
+  th{background:#142a42;color:#ffe0b5}
+  td{background:#081525;color:#e8f3ff}
+  .pill{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-weight:bold;
+    color:#111827;
+  }
+  .ok{background:#83f6a5}
+  .warn{background:#ffe36d}
+  .bad{background:#ff7777}
+  .blue{background:#93c5fd}
+  footer{text-align:center;padding:18px;color:#adc2d6}
+  .printOnly,.reportBox{display:none}
+
+  @media(max-width:1100px){
+    .layout{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr 1fr}
+    #canvas{height:520px}
+  }
+  @media(max-width:600px){
+    .row,.row3{grid-template-columns:1fr}
+    .resultGrid{grid-template-columns:1fr}
+    header h1{font-size:22px}
+  }
+
+  @media print{
+    body{background:white!important;color:#111827!important}
+    header,footer,.layout{display:none!important}
+    main{max-width:100%;padding:0;margin:0}
+    .printOnly,.reportBox{display:block!important}
+    .reportBox{
+      background:white!important;
+      color:#111827!important;
+      padding:20px;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+    .reportHeader{
+      border-bottom:3px solid #111827;
+      padding-bottom:10px;
+      margin-bottom:12px;
+      text-align:center;
+    }
+    .reportHeader h1{margin:0;font-size:22px}
+    .reportHeader p{margin:4px 0;font-size:13px}
+    .reportGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .reportCard{
+      border:1px solid #333;
+      border-radius:8px;
+      padding:8px;
+      min-height:48px;
+    }
+    .reportCard strong{display:block;font-size:12px;color:#333;margin-bottom:4px}
+    .reportCard span{font-size:16px;font-weight:bold}
+    .reportTable{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      font-size:12px;
+    }
+    .reportTable th,.reportTable td{
+      border:1px solid #333;
+      padding:7px;
+      color:#111827!important;
+      background:white!important;
+    }
+    .reportTable th{background:#eeeeee!important}
+    .assinaturas{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:40px;
+      margin-top:50px;
+      font-size:12px;
+    }
+    .linhaAss{
+      border-top:1px solid #111827;
+      text-align:center;
+      padding-top:6px;
+    }
+    @page{size:A4;margin:12mm}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Simulador de Linha de Processo de Biscoitos</h1>
+  <p>Produção total, linha de biscoito recheado, forno, resfriamento, batelada de massa e desenvolvimento do produto</p>
+</header>
+
+<main>
+  <div class="layout">
+    <section class="card">
+      <h2>Entrada da linha</h2>
+
+      <h3>Dados do relatório</h3>
+      <div class="row">
+        <div>
+          <label>Produto / sabor</label>
+          <input id="produto" value="Biscoito recheado">
+        </div>
+        <div>
+          <label>Lote / OP</label>
+          <input id="lote" value="OP-001">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Operador</label>
+          <input id="operador" value="">
+        </div>
+        <div>
+          <label>Turno</label>
+          <input id="turno" value="1º Turno">
+        </div>
+      </div>
+
+      <h3>Tipo de processo</h3>
+      <label>Escolha a linha</label>
+      <select id="tipoLinha" onchange="trocarLinha()">
+        <option value="total">Produção total de biscoito simples</option>
+        <option value="recheado">Linha de biscoito recheado</option>
+      </select>
+
+      <h3>Batelada e massa</h3>
+      <div class="row">
+        <div>
+          <label>Quantidade de bateladas</label>
+          <input id="qtdBateladas" type="number" min="1" step="1" value="4">
+        </div>
+        <div>
+          <label>Kg de massa por batelada</label>
+          <input id="kgBatelada" type="number" min="1" step="0.1" value="250">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Condição da massa</label>
+          <select id="condMassa">
+            <option value="ideal">Ideal / padrão</option>
+            <option value="mole">Mole / muito hidratada</option>
+            <option value="dura">Dura / firme</option>
+          </select>
+        </div>
+        <div>
+          <label>Espessura da lâmina (mm)</label>
+          <input id="espessura" type="number" min="1" step="0.1" value="4.2">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Gramas do biscoito cru</label>
+          <input id="gCru" type="number" min="0.1" step="0.01" value="8.5">
+        </div>
+        <div>
+          <label>Gramas do biscoito assado</label>
+          <input id="gAssado" type="number" min="0.1" step="0.01" value="7.2">
+        </div>
+      </div>
+
+      <h3>Capacidade de formação</h3>
+      <div class="row">
+        <div>
+          <label>Formas/cavidades por volta</label>
+          <input id="formas" type="number" min="1" step="1" value="96">
+        </div>
+        <div>
+          <label>RPM do rolo</label>
+          <input id="rpm" type="number" min="0" step="0.1" value="28">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tempo total de produção (min)</label>
+          <input id="tempoProducao" type="number" min="0" step="0.1" value="60">
+        </div>
+        <div>
+          <label>Perda/quebra geral (%)</label>
+          <input id="perdaGeral" type="number" min="0" max="100" step="0.1" value="2.5">
+        </div>
+      </div>
+
+      <h3>Forneamento</h3>
+      <div class="row">
+        <div>
+          <label>Comprimento do forno (m)</label>
+          <input id="compForno" type="number" min="1" step="0.1" value="45">
+        </div>
+        <div>
+          <label>Velocidade da esteira do forno (m/min)</label>
+          <input id="velForno" type="number" min="0.1" step="0.1" value="7">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tempo padrão de forno (min)</label>
+          <input id="tempoFornoPadrao" type="number" min="0.1" step="0.1" value="6.5">
+        </div>
+        <div>
+          <label>Temperatura média do forno (°C)</label>
+          <input id="tempForno" type="number" min="1" step="1" value="185">
+        </div>
+      </div>
+
+      <h3>Resfriamento por esteiras</h3>
+      <div class="row">
+        <div>
+          <label>Comprimento total das esteiras (m)</label>
+          <input id="compResfriamento" type="number" min="1" step="0.1" value="65">
+        </div>
+        <div>
+          <label>Velocidade da esteira fria (m/min)</label>
+          <input id="velResfriamento" type="number" min="0.1" step="0.1" value="8">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tempo padrão de resfriamento (min)</label>
+          <input id="tempoResfriamentoPadrao" type="number" min="0.1" step="0.1" value="8">
+        </div>
+        <div>
+          <label>Temperatura antes de rechear (°C)</label>
+          <input id="tempAntesRecheio" type="number" min="1" step="1" value="32">
+        </div>
+      </div>
+
+      <div id="boxRecheado">
+        <h3>Linha de recheado</h3>
+        <div class="row">
+          <div>
+            <label>Gramas de recheio por sanduíche</label>
+            <input id="gRecheio" type="number" min="0" step="0.01" value="5.5">
+          </div>
+          <div>
+            <label>Kg de recheio disponível</label>
+            <input id="kgRecheio" type="number" min="0" step="0.1" value="450">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Perda de recheio (%)</label>
+            <input id="perdaRecheio" type="number" min="0" max="100" step="0.1" value="1.8">
+          </div>
+          <div>
+            <label>Capacidade recheadora (sanduíches/min)</label>
+            <input id="capRecheadora" type="number" min="0" step="1" value="220">
+          </div>
+        </div>
+      </div>
+
+      <h3>Empacotamento</h3>
+      <div class="row">
+        <div>
+          <label>Peso por pacote (g)</label>
+          <input id="pesoPacote" type="number" min="1" step="1" value="300">
+        </div>
+        <div>
+          <label>Pacotes por caixa</label>
+          <input id="pacotesCaixa" type="number" min="1" step="1" value="20">
+        </div>
+      </div>
+
+      <label class="check">
+        <input id="animar" type="checkbox" checked>
+        Animar linha de processo
+      </label>
+
+      <button onclick="calcular()">Calcular processo</button>
+      <button class="btnPrint" onclick="imprimirRelatorio()">Imprimir relatório</button>
+      <button onclick="exemploSimples()">Exemplo produção total</button>
+      <button onclick="exemploRecheado()">Exemplo recheado</button>
+
+      <div class="explain">
+        O programa calcula o gargalo entre massa disponível e capacidade da linha.
+        <div class="formula">tempo forno = comprimento do forno ÷ velocidade da esteira</div>
+        <div class="formula">tempo resfriamento = comprimento das esteiras ÷ velocidade</div>
+        <div class="formula">recheado = pares de biscoitos assados + recheio disponível</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>Animação da linha de processo</h2>
+        <canvas id="canvas" width="1080" height="620"></canvas>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>Resultados principais</h2>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Massa total disponível</div>
+            <div id="rMassaTotal" class="value">--</div>
+            <div id="rBateladas" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Produção final boa</div>
+            <div id="rProducaoFinal" class="value">--</div>
+            <div id="rProducaoDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Tempo de forno</div>
+            <div id="rTempoForno" class="value">--</div>
+            <div id="rFornoStatus" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Tempo de resfriamento</div>
+            <div id="rTempoFrio" class="value">--</div>
+            <div id="rFrioStatus" class="small">--</div>
+          </div>
+        </div>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Desenvolvimento do biscoito</div>
+            <div id="rDesenvolvimento" class="value">--</div>
+            <div id="rMassaStatus" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Perfil do produto</div>
+            <div id="rPerfil" class="value">--</div>
+            <div id="rPerfilDetalhe" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Pacotes</div>
+            <div id="rPacotes" class="value">--</div>
+            <div id="rCaixas" class="small">--</div>
+          </div>
+          <div class="metric">
+            <div class="title">Gargalo da linha</div>
+            <div id="rGargalo" class="value">--</div>
+            <div id="rGargaloDetalhe" class="small">--</div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Resultado</th>
+              <th>Interpretação</th>
+            </tr>
+          </thead>
+          <tbody id="tabela"></tbody>
+        </table>
+
+        <div class="explain">
+          <strong>Padrão da linha de processo:</strong><br>
+          A massa ideal deve formar bem, assar dentro da faixa de tempo, resfriar antes do recheio e chegar estável ao empacotamento. Massa muito mole tende a abrir mais, ficar mais fina e pesada. Massa dura tende a desenvolver mais altura e leveza, mas pode gerar trinca ou má formação se passar do ponto.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section id="relatorioImpressao" class="printOnly reportBox">
+    <div class="reportHeader">
+      <h1>RELATÓRIO DA LINHA DE PROCESSO DE BISCOITOS</h1>
+      <p>Produção total, recheado, forno, resfriamento e batelada de massa</p>
+      <p id="repData">Data: --</p>
+    </div>
+
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Produto / sabor</strong><span id="repProduto">--</span></div>
+      <div class="reportCard"><strong>Lote / OP</strong><span id="repLote">--</span></div>
+      <div class="reportCard"><strong>Operador</strong><span id="repOperador">--</span></div>
+      <div class="reportCard"><strong>Turno</strong><span id="repTurno">--</span></div>
+    </div>
+
+    <h2 style="color:#111827;margin-top:16px;">Resumo calculado</h2>
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Tipo de linha</strong><span id="repTipoLinha">--</span></div>
+      <div class="reportCard"><strong>Massa total</strong><span id="repMassa">--</span></div>
+      <div class="reportCard"><strong>Produção final</strong><span id="repFinal">--</span></div>
+      <div class="reportCard"><strong>Pacotes</strong><span id="repPacotes">--</span></div>
+      <div class="reportCard"><strong>Tempo de forno</strong><span id="repForno">--</span></div>
+      <div class="reportCard"><strong>Tempo resfriamento</strong><span id="repFrio">--</span></div>
+      <div class="reportCard"><strong>Desenvolvimento</strong><span id="repDesenvolvimento">--</span></div>
+      <div class="reportCard"><strong>Gargalo</strong><span id="repGargalo">--</span></div>
+    </div>
+
+    <table class="reportTable">
+      <thead>
+        <tr>
+          <th>Parâmetro</th>
+          <th>Valor</th>
+          <th>Resultado / observação</th>
+        </tr>
+      </thead>
+      <tbody id="repTabela"></tbody>
+    </table>
+
+    <h2 style="color:#111827;margin-top:16px;">Fórmulas utilizadas</h2>
+    <table class="reportTable">
+      <tbody>
+        <tr><td>Massa total</td><td>bateladas × kg por batelada</td></tr>
+        <tr><td>Peças pela massa</td><td>massa total × 1000 ÷ gramas do biscoito cru</td></tr>
+        <tr><td>Peças pela linha</td><td>formas por volta × RPM × tempo de produção</td></tr>
+        <tr><td>Tempo de forno</td><td>comprimento do forno ÷ velocidade da esteira</td></tr>
+        <tr><td>Tempo de resfriamento</td><td>comprimento das esteiras ÷ velocidade da esteira fria</td></tr>
+        <tr><td>Recheado</td><td>mínimo entre pares de biscoitos assados e recheio disponível</td></tr>
+      </tbody>
+    </table>
+
+    <div class="assinaturas">
+      <div class="linhaAss">Assinatura do operador</div>
+      <div class="linhaAss">Conferência / responsável</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Simulador HTML + CSS + JavaScript para linha de biscoitos, recheado, forno, resfriamento e massa
+</footer>
+
+<script>
+let dados = {};
+let t = 0;
+
+function n(id){ return Number(document.getElementById(id).value); }
+function v(id){ return (document.getElementById(id).value || "").trim(); }
+
+function fmt(num, casas=2){
+  if(!isFinite(num)) return "0";
+  return num.toLocaleString("pt-BR", {minimumFractionDigits: casas, maximumFractionDigits: casas});
+}
+
+function inteiro(num){
+  if(!isFinite(num)) return "0";
+  return Math.floor(num).toLocaleString("pt-BR");
+}
+
+function trocaTexto(id, valor){ document.getElementById(id).innerHTML = valor; }
+
+function trocarLinha(){
+  const tipo = document.getElementById("tipoLinha").value;
+  document.getElementById("boxRecheado").style.display = tipo === "recheado" ? "block" : "none";
+  calcular();
+}
+
+function fatorMassa(cond){
+  if(cond === "mole"){
+    return {
+      nome:"Mole",
+      fatorPeso:1.08,
+      fatorAltura:0.82,
+      espalhamento:1.18,
+      perdaExtra:2.8,
+      desenvolvimento:54,
+      perfil:"Fino e pesado",
+      detalhe:"A massa mole espalha mais, reduz altura, pode grudar e tende a gerar biscoito fino, pesado e com menor desenvolvimento."
+    };
+  }
+  if(cond === "dura"){
+    return {
+      nome:"Dura",
+      fatorPeso:0.94,
+      fatorAltura:1.16,
+      espalhamento:0.92,
+      perdaExtra:1.6,
+      desenvolvimento:78,
+      perfil:"Alto e leve",
+      detalhe:"A massa dura/firme pode desenvolver mais altura e leveza, porém pode rachar ou formar mal se ficar seca demais."
+    };
+  }
+  return {
+    nome:"Ideal",
+    fatorPeso:1.00,
+    fatorAltura:1.00,
+    espalhamento:1.00,
+    perdaExtra:0,
+    desenvolvimento:90,
+    perfil:"Padrão",
+    detalhe:"A massa ideal mantém formato, peso, altura e desenvolvimento dentro do padrão esperado da linha."
+  };
+}
+
+function statusTempo(real, padrao){
+  const dif = ((real - padrao) / padrao) * 100;
+  if(Math.abs(dif) <= 10) return {classe:"ok", nome:"PADRÃO", detalhe:"Dentro de ±10% do padrão."};
+  if(dif < -10) return {classe:"warn", nome:"CURTO", detalhe:"Tempo menor que o padrão. Pode sair cru, úmido ou pouco estruturado."};
+  return {classe:"warn", nome:"LONGO", detalhe:"Tempo maior que o padrão. Pode ressecar, escurecer ou quebrar mais."};
+}
+
+function classeDev(v){
+  if(v >= 80) return "ok";
+  if(v >= 60) return "warn";
+  return "bad";
+}
+
+function calcular(){
+  const tipoLinha = document.getElementById("tipoLinha").value;
+  const qtdBateladas = Math.max(1, n("qtdBateladas"));
+  const kgBatelada = Math.max(0.1, n("kgBatelada"));
+  const condMassa = document.getElementById("condMassa").value;
+  const fM = fatorMassa(condMassa);
+  const espessura = Math.max(0.1, n("espessura"));
+
+  const gCruBase = Math.max(0.1, n("gCru"));
+  const gAssadoBase = Math.max(0.1, n("gAssado"));
+  const gCru = gCruBase * fM.fatorPeso * (espessura / 4.2);
+  const gAssado = gAssadoBase * fM.fatorPeso * (espessura / 4.2);
+
+  const formas = Math.max(1, n("formas"));
+  const rpm = Math.max(0, n("rpm"));
+  const tempoProducao = Math.max(0, n("tempoProducao"));
+  const perdaGeralBase = Math.min(100, Math.max(0, n("perdaGeral")));
+  const perdaGeral = Math.min(100, perdaGeralBase + fM.perdaExtra);
+
+  const compForno = Math.max(0.1, n("compForno"));
+  const velForno = Math.max(0.1, n("velForno"));
+  const tempoFornoPadrao = Math.max(0.1, n("tempoFornoPadrao"));
+  const tempForno = Math.max(1, n("tempForno"));
+  const tempoForno = compForno / velForno;
+  const stForno = statusTempo(tempoForno, tempoFornoPadrao);
+
+  const compResfriamento = Math.max(0.1, n("compResfriamento"));
+  const velResfriamento = Math.max(0.1, n("velResfriamento"));
+  const tempoResfriamentoPadrao = Math.max(0.1, n("tempoResfriamentoPadrao"));
+  const tempAntesRecheio = Math.max(1, n("tempAntesRecheio"));
+  const tempoResfriamento = compResfriamento / velResfriamento;
+  const stFrio = statusTempo(tempoResfriamento, tempoResfriamentoPadrao);
+
+  const gRecheio = Math.max(0, n("gRecheio"));
+  const kgRecheio = Math.max(0, n("kgRecheio"));
+  const perdaRecheio = Math.min(100, Math.max(0, n("perdaRecheio")));
+  const capRecheadora = Math.max(0, n("capRecheadora"));
+
+  const pesoPacote = Math.max(1, n("pesoPacote"));
+  const pacotesCaixa = Math.max(1, n("pacotesCaixa"));
+
+  const massaTotalKg = qtdBateladas * kgBatelada;
+  const pecasPossiveisMassa = Math.floor((massaTotalKg * 1000) / gCru);
+  const pecasPossiveisLinha = Math.floor(formas * rpm * tempoProducao);
+  const pecasFormadas = Math.min(pecasPossiveisMassa, pecasPossiveisLinha);
+
+  const kgCruUsado = pecasFormadas * gCru / 1000;
+  const kgAssado = pecasFormadas * gAssado / 1000;
+  const perdaFornoKg = Math.max(0, kgCruUsado - kgAssado);
+  const perdaFornoPct = kgCruUsado > 0 ? perdaFornoKg / kgCruUsado * 100 : 0;
+
+  let gargalo = "Linha";
+  if(pecasPossiveisMassa < pecasPossiveisLinha) gargalo = "Massa";
+  if(pecasPossiveisMassa === pecasPossiveisLinha) gargalo = "Equilibrado";
+
+  let produtoFinalKg = 0;
+  let unidadesFinais = 0;
+  let detalheFinal = "";
+  let recheioUsadoKg = 0;
+  let recheioDisponivelKg = kgRecheio * (1 - perdaRecheio / 100);
+  let sanduichesPorCasco = Math.floor(pecasFormadas / 2);
+  let sanduichesPorRecheio = gRecheio > 0 ? Math.floor((recheioDisponivelKg * 1000) / gRecheio) : 0;
+  let sanduichesPorRecheadora = Math.floor(capRecheadora * tempoProducao);
+
+  if(tipoLinha === "recheado"){
+    unidadesFinais = Math.min(sanduichesPorCasco, sanduichesPorRecheio, sanduichesPorRecheadora);
+    recheioUsadoKg = unidadesFinais * gRecheio / 1000;
+    const kgCascoUsado = unidadesFinais * 2 * gAssado / 1000;
+    produtoFinalKg = (kgCascoUsado + recheioUsadoKg) * (1 - perdaGeral/100);
+
+    if(unidadesFinais === sanduichesPorCasco) gargalo = "Cascos assados";
+    if(unidadesFinais === sanduichesPorRecheio) gargalo = "Recheio";
+    if(unidadesFinais === sanduichesPorRecheadora) gargalo = "Recheadora";
+
+    detalheFinal = inteiro(unidadesFinais) + " sanduíches recheados";
+  }else{
+    unidadesFinais = Math.floor(pecasFormadas * (1 - perdaGeral/100));
+    produtoFinalKg = kgAssado * (1 - perdaGeral/100);
+    detalheFinal = inteiro(unidadesFinais) + " biscoitos simples bons";
+  }
+
+  const pacotes = Math.floor((produtoFinalKg * 1000) / pesoPacote);
+  const kgEmpacotado = pacotes * pesoPacote / 1000;
+  const sobraKg = Math.max(0, produtoFinalKg - kgEmpacotado);
+  const caixas = Math.floor(pacotes / pacotesCaixa);
+  const pacotesSoltos = pacotes % pacotesCaixa;
+
+  const desenvolvimento = Math.max(0, Math.min(100, fM.desenvolvimento - Math.abs(tempoForno - tempoFornoPadrao)*4 - Math.max(0,tempAntesRecheio-36)*1.5));
+  const alturaIndice = 100 * fM.fatorAltura * Math.min(1.25, Math.max(0.75, espessura/4.2));
+  const pesoIndice = 100 * fM.fatorPeso * Math.min(1.25, Math.max(0.75, espessura/4.2));
+  const larguraIndice = 100 * fM.espalhamento;
+
+  dados = {
+    tipoLinha, qtdBateladas, kgBatelada, condMassa, massaNome:fM.nome,
+    massaDetalhe:fM.detalhe, massaPerfil:fM.perfil, espessura, gCruBase, gAssadoBase,
+    gCru, gAssado, formas, rpm, tempoProducao, perdaGeralBase, perdaGeral,
+    compForno, velForno, tempoFornoPadrao, tempForno, tempoForno, stForno,
+    compResfriamento, velResfriamento, tempoResfriamentoPadrao, tempAntesRecheio,
+    tempoResfriamento, stFrio, gRecheio, kgRecheio, perdaRecheio, capRecheadora,
+    pesoPacote, pacotesCaixa, massaTotalKg, pecasPossiveisMassa, pecasPossiveisLinha,
+    pecasFormadas, kgCruUsado, kgAssado, perdaFornoKg, perdaFornoPct,
+    gargalo, produtoFinalKg, unidadesFinais, detalheFinal, recheioDisponivelKg,
+    recheioUsadoKg, sanduichesPorCasco, sanduichesPorRecheio, sanduichesPorRecheadora,
+    pacotes, kgEmpacotado, sobraKg, caixas, pacotesSoltos, desenvolvimento,
+    alturaIndice, pesoIndice, larguraIndice
+  };
+
+  atualizarTela();
+}
+
+function atualizarTela(){
+  trocaTexto("rMassaTotal", fmt(dados.massaTotalKg,1) + " kg");
+  trocaTexto("rBateladas", inteiro(dados.qtdBateladas) + " bateladas × " + fmt(dados.kgBatelada,1) + " kg");
+
+  trocaTexto("rProducaoFinal", fmt(dados.produtoFinalKg,2) + " kg");
+  trocaTexto("rProducaoDetalhe", dados.detalheFinal);
+
+  trocaTexto("rTempoForno", fmt(dados.tempoForno,2) + " min");
+  trocaTexto("rFornoStatus", "<span class='pill " + dados.stForno.classe + "'>" + dados.stForno.nome + "</span> " + dados.stForno.detalhe);
+
+  trocaTexto("rTempoFrio", fmt(dados.tempoResfriamento,2) + " min");
+  trocaTexto("rFrioStatus", "<span class='pill " + dados.stFrio.classe + "'>" + dados.stFrio.nome + "</span> " + dados.stFrio.detalhe);
+
+  const devClasse = classeDev(dados.desenvolvimento);
+  trocaTexto("rDesenvolvimento", "<span class='pill " + devClasse + "'>" + fmt(dados.desenvolvimento,0) + "%</span>");
+  trocaTexto("rMassaStatus", dados.massaNome + ": " + dados.massaDetalhe);
+
+  trocaTexto("rPerfil", dados.massaPerfil);
+  trocaTexto("rPerfilDetalhe", "Altura índice " + fmt(dados.alturaIndice,0) + " | Peso índice " + fmt(dados.pesoIndice,0));
+
+  trocaTexto("rPacotes", inteiro(dados.pacotes));
+  trocaTexto("rCaixas", inteiro(dados.caixas) + " caixas + " + inteiro(dados.pacotesSoltos) + " pacotes soltos");
+
+  let gClasse = dados.gargalo === "Equilibrado" ? "ok" : "warn";
+  trocaTexto("rGargalo", "<span class='pill " + gClasse + "'>" + dados.gargalo + "</span>");
+  trocaTexto("rGargaloDetalhe", "Massa permite " + inteiro(dados.pecasPossiveisMassa) + " peças; linha permite " + inteiro(dados.pecasPossiveisLinha) + ".");
+
+  let linhasRecheado = "";
+  if(dados.tipoLinha === "recheado"){
+    linhasRecheado = `
+      <tr>
+        <td>Sanduíches por cascos</td>
+        <td>${inteiro(dados.sanduichesPorCasco)}</td>
+        <td>Quantidade possível usando 2 biscoitos assados para cada recheado.</td>
+      </tr>
+      <tr>
+        <td>Sanduíches por recheio disponível</td>
+        <td>${inteiro(dados.sanduichesPorRecheio)}</td>
+        <td>Recheio disponível após perda: ${fmt(dados.recheioDisponivelKg,2)} kg.</td>
+      </tr>
+      <tr>
+        <td>Capacidade da recheadora</td>
+        <td>${inteiro(dados.sanduichesPorRecheadora)}</td>
+        <td>${fmt(dados.capRecheadora,0)} sanduíches/min durante ${fmt(dados.tempoProducao,1)} min.</td>
+      </tr>
+      <tr>
+        <td>Recheio usado</td>
+        <td>${fmt(dados.recheioUsadoKg,2)} kg</td>
+        <td>${fmt(dados.gRecheio,2)} g por sanduíche recheado.</td>
+      </tr>
+    `;
+  }
+
+  const tabela = `
+    <tr>
+      <td>Massa total</td>
+      <td>${fmt(dados.massaTotalKg,2)} kg</td>
+      <td>${inteiro(dados.qtdBateladas)} bateladas de ${fmt(dados.kgBatelada,1)} kg.</td>
+    </tr>
+    <tr>
+      <td>Condição da massa</td>
+      <td><span class="pill ${classeDev(dados.desenvolvimento)}">${dados.massaNome}</span></td>
+      <td>${dados.massaDetalhe}</td>
+    </tr>
+    <tr>
+      <td>Peso corrigido por unidade</td>
+      <td>${fmt(dados.gCru,2)} g cru / ${fmt(dados.gAssado,2)} g assado</td>
+      <td>Corrigido pela condição da massa e espessura informada.</td>
+    </tr>
+    <tr>
+      <td>Peças possíveis pela massa</td>
+      <td>${inteiro(dados.pecasPossiveisMassa)}</td>
+      <td>Limite calculado pelo total de massa disponível.</td>
+    </tr>
+    <tr>
+      <td>Peças possíveis pela linha</td>
+      <td>${inteiro(dados.pecasPossiveisLinha)}</td>
+      <td>${inteiro(dados.formas)} formas × ${fmt(dados.rpm,1)} RPM × ${fmt(dados.tempoProducao,1)} min.</td>
+    </tr>
+    <tr>
+      <td>Peças realmente formadas</td>
+      <td>${inteiro(dados.pecasFormadas)}</td>
+      <td>É o menor valor entre capacidade da massa e capacidade da linha.</td>
+    </tr>
+    <tr>
+      <td>Perda no forno</td>
+      <td>${fmt(dados.perdaFornoKg,2)} kg / ${fmt(dados.perdaFornoPct,1)}%</td>
+      <td>Diferença entre peso cru usado e peso assado.</td>
+    </tr>
+    <tr>
+      <td>Tempo de forneamento</td>
+      <td>${fmt(dados.tempoForno,2)} min</td>
+      <td>${dados.stForno.detalhe} Temperatura média: ${fmt(dados.tempForno,0)} °C.</td>
+    </tr>
+    <tr>
+      <td>Tempo de resfriamento</td>
+      <td>${fmt(dados.tempoResfriamento,2)} min</td>
+      <td>${dados.stFrio.detalhe} Temperatura antes de rechear: ${fmt(dados.tempAntesRecheio,0)} °C.</td>
+    </tr>
+    ${linhasRecheado}
+    <tr>
+      <td>Produção final boa</td>
+      <td>${fmt(dados.produtoFinalKg,2)} kg</td>
+      <td>${dados.detalheFinal}. Perda geral aplicada: ${fmt(dados.perdaGeral,1)}%.</td>
+    </tr>
+    <tr>
+      <td>Pacotes</td>
+      <td>${inteiro(dados.pacotes)} pacotes de ${fmt(dados.pesoPacote,0)} g</td>
+      <td>Sobra sem completar pacote: ${fmt(dados.sobraKg,2)} kg.</td>
+    </tr>
+    <tr>
+      <td>Caixas</td>
+      <td>${inteiro(dados.caixas)} caixas</td>
+      <td>${inteiro(dados.pacotesSoltos)} pacotes soltos considerando ${inteiro(dados.pacotesCaixa)} pacotes por caixa.</td>
+    </tr>
+  `;
+  document.getElementById("tabela").innerHTML = tabela;
+}
+
+function desenhar(){
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+
+  t += document.getElementById("animar").checked ? 0.034 : 0;
+  ctx.clearRect(0,0,W,H);
+  if(!dados.massaTotalKg) calcular();
+
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#fff8ea");
+  grad.addColorStop(1,"#dfefff");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 24px Arial";
+  ctx.fillText("Linha de processo: massa → formação → forno → resfriamento → recheio/embalagem", 28, 38);
+
+  ctx.font = "15px Arial";
+  ctx.fillText("Massa: " + dados.massaNome + " | Desenvolvimento: " + fmt(dados.desenvolvimento,0) + "% | Gargalo: " + dados.gargalo, 28, 62);
+
+  drawMixer(ctx, 45, 105, 170, 155);
+  drawDoughSheet(ctx, 235, 145, 150, 100);
+  drawRotary(ctx, 415, 160, 62);
+  drawOven(ctx, 520, 110, 230, 150);
+  drawCooling(ctx, 765, 120, 250, 140);
+
+  if(dados.tipoLinha === "recheado"){
+    drawFiller(ctx, 630, 315, 230, 120);
+    drawSandwiches(ctx);
+  }else{
+    drawPacker(ctx, 650, 315, 230, 120, "EMPACOTAMENTO");
+    drawSimpleBiscuits(ctx);
+  }
+
+  drawConveyor(ctx, 60, 280, 940, 56);
+  drawResultPanel(ctx, 35, 465, 330, 120);
+  drawQualityPanel(ctx, 390, 465, 330, 120);
+  drawTimePanel(ctx, 745, 465, 300, 120);
+
+  requestAnimationFrame(desenhar);
+}
+
+function drawMixer(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle = "#4b5563";
+  roundRect(ctx,x,y,w,h,18,true,false);
+  ctx.fillStyle = "#1f2937";
+  roundRect(ctx,x+18,y+25,w-36,h-50,14,true,false);
+
+  const cond = dados.condMassa;
+  ctx.fillStyle = cond === "mole" ? "#e8be75" : cond === "dura" ? "#c99142" : "#d9a75d";
+  ctx.beginPath();
+  if(cond === "mole"){
+    ctx.ellipse(x+w/2, y+h-50+Math.sin(t*3)*3, 55, 25, 0, 0, Math.PI*2);
+  }else if(cond === "dura"){
+    ctx.ellipse(x+w/2, y+h-55, 43, 35, 0, 0, Math.PI*2);
+  }else{
+    ctx.ellipse(x+w/2, y+h-52, 50, 30, 0, 0, Math.PI*2);
+  }
+  ctx.fill();
+
+  ctx.strokeStyle = "#9c6a2f";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x+w/2, y+20);
+  ctx.lineTo(x+w/2, y+h-70);
+  ctx.stroke();
+
+  ctx.save();
+  ctx.translate(x+w/2,y+h-70);
+  ctx.rotate(t*4);
+  ctx.strokeStyle = "#d1d5db";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(-35,0);
+  ctx.lineTo(35,0);
+  ctx.moveTo(0,-24);
+  ctx.lineTo(0,24);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle = "#eaf5ff";
+  ctx.font = "bold 15px Arial";
+  ctx.fillText("BATELADA", x+45, y+22);
+  ctx.font = "12px Arial";
+  ctx.fillText(fmt(dados.massaTotalKg,0) + " kg massa", x+42, y+h+18);
+  ctx.restore();
+}
+
+function drawDoughSheet(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle = "#64748b";
+  roundRect(ctx,x,y+70,w,28,12,true,false);
+  ctx.fillStyle = "#334155";
+  ctx.fillRect(x+10,y+82,w-20,8);
+
+  let sheetH = Math.max(10, Math.min(38, dados.espessura*6));
+  let sheetY = y+74-sheetH;
+  let color = dados.condMassa === "mole" ? "#efc987" : dados.condMassa === "dura" ? "#c58b3c" : "#d6a45c";
+
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  if(dados.condMassa === "mole"){
+    ctx.moveTo(x+5, sheetY+8);
+    ctx.quadraticCurveTo(x+w/2, sheetY+sheetH+8+Math.sin(t*3)*3, x+w-5, sheetY+8);
+    ctx.lineTo(x+w-5, y+76);
+    ctx.lineTo(x+5, y+76);
+  }else{
+    roundRect(ctx,x+5,sheetY,w-10,sheetH,8,true,false);
+  }
+  ctx.fill();
+
+  // rolos
+  ctx.fillStyle = "#94a3b8";
+  ctx.beginPath();
+  ctx.arc(x+38,y+58,20,0,Math.PI*2);
+  ctx.arc(x+w-38,y+58,20,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 13px Arial";
+  ctx.fillText("LAMINAÇÃO", x+30, y+117);
+  ctx.restore();
+}
+
+function drawRotary(ctx,cx,cy,r){
+  ctx.save();
+  ctx.fillStyle = "#9a642b";
+  ctx.strokeStyle = "#5c3619";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(t*3);
+  for(let i=0;i<14;i++){
+    const ang = i*Math.PI*2/14;
+    const x = Math.cos(ang)*r*0.62;
+    const y = Math.sin(ang)*r*0.62;
+    ctx.fillStyle = "#5f381a";
+    ctx.beginPath();
+    ctx.ellipse(x,y,12,8,ang,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.fillStyle = "#102033";
+  ctx.font = "bold 13px Arial";
+  ctx.fillText("ROLO FORMADOR", cx-55, cy+r+22);
+  ctx.restore();
+}
+
+function drawOven(ctx,x,y,w,h){
+  ctx.save();
+  const g = ctx.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0,"#7c2d12");
+  g.addColorStop(0.5,"#f97316");
+  g.addColorStop(1,"#7c2d12");
+  ctx.fillStyle = g;
+  roundRect(ctx,x,y,w,h,20,true,false);
+
+  ctx.fillStyle = "#1f2937";
+  roundRect(ctx,x+24,y+48,w-48,h-75,12,true,false);
+
+  for(let i=0;i<5;i++){
+    const fx=x+40+i*34;
+    const fy=y+h-26;
+    ctx.fillStyle=i%2===0?"#fde047":"#fb923c";
+    ctx.beginPath();
+    ctx.moveTo(fx,fy);
+    ctx.quadraticCurveTo(fx+10,fy-34-Math.sin(t*7+i)*8,fx+20,fy);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.fillStyle="#fff7ed";
+  ctx.font="bold 18px Arial";
+  ctx.fillText("FORNO", x+82, y+30);
+  ctx.font="12px Arial";
+  ctx.fillText(fmt(dados.tempoForno,1)+" min | "+fmt(dados.tempForno,0)+"°C", x+55, y+h+20);
+  ctx.restore();
+}
+
+function drawCooling(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="#1d4ed8";
+  roundRect(ctx,x,y,w,h,18,true,false);
+  ctx.fillStyle="#dbeafe";
+  ctx.font="bold 16px Arial";
+  ctx.fillText("ESTEIRAS DE RESFRIAMENTO", x+25, y+25);
+
+  for(let k=0;k<3;k++){
+    const yy=y+48+k*28;
+    ctx.fillStyle="#0f172a";
+    roundRect(ctx,x+18,yy,w-36,16,8,true,false);
+    ctx.strokeStyle="#e0f2fe";
+    ctx.lineWidth=2;
+    for(let i=0;i<10;i++){
+      const xx=x+25+((i*30+(t*80)%30)%(w-50));
+      ctx.beginPath();
+      ctx.moveTo(xx,yy+2);
+      ctx.lineTo(xx-10,yy+14);
+      ctx.stroke();
+    }
+  }
+
+  // vento
+  ctx.strokeStyle="#93c5fd";
+  ctx.lineWidth=3;
+  for(let i=0;i<4;i++){
+    const wx=x+40+i*48+Math.sin(t*3+i)*5;
+    ctx.beginPath();
+    ctx.moveTo(wx,y+118);
+    ctx.quadraticCurveTo(wx+18,y+108,wx+38,y+118);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle="#102033";
+  ctx.font="12px Arial";
+  ctx.fillText(fmt(dados.tempoResfriamento,1)+" min | antes recheio "+fmt(dados.tempAntesRecheio,0)+"°C", x+45, y+h+20);
+  ctx.restore();
+}
+
+function drawConveyor(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="#334155";
+  roundRect(ctx,x,y,w,h,18,true,false);
+  ctx.fillStyle="#111827";
+  roundRect(ctx,x+18,y+15,w-36,h-30,14,true,false);
+  ctx.strokeStyle="#d1d5db";
+  ctx.lineWidth=2;
+  for(let i=0;i<25;i++){
+    const xx=x+((i*50+(t*90)%50)%w);
+    ctx.beginPath();
+    ctx.moveTo(xx,y+18);
+    ctx.lineTo(xx-22,y+h-18);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawSimpleBiscuits(ctx){
+  ctx.save();
+  for(let i=0;i<20;i++){
+    const p=((i/20)+t*0.13)%1;
+    const x=95+p*850;
+    const y=307+Math.sin(p*10+t)*3;
+    let color=x<520?"#e9bd73":"#b77935";
+    if(x>520&&x<760) color=mix("#e9bd73","#b77935",(x-520)/240);
+    drawBiscuit(ctx,x,y,color,false);
+  }
+  ctx.restore();
+}
+
+function drawSandwiches(ctx){
+  ctx.save();
+  for(let i=0;i<18;i++){
+    const p=((i/18)+t*0.12)%1;
+    const x=95+p*850;
+    const y=307+Math.sin(p*10+t)*3;
+    if(x<620){
+      drawBiscuit(ctx,x,y,x<520?"#e9bd73":"#b77935",false);
+    }else{
+      drawBiscuit(ctx,x,y-5,"#b77935",false);
+      ctx.fillStyle="#f5f5dc";
+      ctx.fillRect(x-15,y-1,30,5);
+      drawBiscuit(ctx,x,y+5,"#9d5d24",false);
+    }
+  }
+  ctx.restore();
+}
+
+function drawBiscuit(ctx,x,y,color){
+  ctx.fillStyle=color;
+  ctx.strokeStyle="#6b3c16";
+  ctx.lineWidth=2;
+  let h=9*(dados.alturaIndice/100);
+  let w=18*(dados.larguraIndice/100);
+  ctx.beginPath();
+  ctx.ellipse(x,y,w,h,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle="rgba(80,45,15,0.35)";
+  for(let j=0;j<4;j++){
+    const ang=j*Math.PI/2+t;
+    ctx.beginPath();
+    ctx.arc(x+Math.cos(ang)*7,y+Math.sin(ang)*3,1.8,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawFiller(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="#6d28d9";
+  roundRect(ctx,x,y,w,h,18,true,false);
+  ctx.fillStyle="#ede9fe";
+  ctx.font="bold 16px Arial";
+  ctx.fillText("RECHEADORA", x+62, y+25);
+
+  ctx.fillStyle="#f5f5dc";
+  roundRect(ctx,x+86,y+45,60,48,12,true,false);
+  ctx.fillStyle="#a16207";
+  roundRect(ctx,x+55,y+62,50,16,8,true,false);
+  roundRect(ctx,x+128,y+62,50,16,8,true,false);
+
+  ctx.fillStyle="#ede9fe";
+  ctx.font="12px Arial";
+  ctx.fillText(fmt(dados.gRecheio,1)+" g recheio/unid", x+50, y+h+18);
+  ctx.restore();
+}
+
+function drawPacker(ctx,x,y,w,h,title){
+  ctx.save();
+  ctx.fillStyle="#0f766e";
+  roundRect(ctx,x,y,w,h,18,true,false);
+  ctx.fillStyle="#ccfbf1";
+  ctx.font="bold 16px Arial";
+  ctx.fillText(title, x+45, y+25);
+
+  for(let i=0;i<4;i++){
+    const px=x+35+i*43+Math.sin(t*4+i)*2;
+    ctx.fillStyle="#fbbf24";
+    roundRect(ctx,px,y+58,34,24,5,true,false);
+    ctx.fillStyle="#111827";
+    ctx.font="bold 9px Arial";
+    ctx.fillText("PAC", px+7, y+73);
+  }
+
+  ctx.fillStyle="#ccfbf1";
+  ctx.font="12px Arial";
+  ctx.fillText(inteiro(dados.pacotes)+" pacotes", x+78, y+h+18);
+  ctx.restore();
+}
+
+function drawResultPanel(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="rgba(8,17,31,.92)";
+  ctx.strokeStyle="#f0b35b";
+  ctx.lineWidth=2;
+  roundRect(ctx,x,y,w,h,16,true,true);
+  ctx.fillStyle="#ffe0b5";
+  ctx.font="bold 17px Arial";
+  ctx.fillText("Produção final",x+16,y+28);
+  ctx.fillStyle="#eaf5ff";
+  ctx.font="14px Arial";
+  const linhas=[
+    "Tipo: "+(dados.tipoLinha==="recheado"?"Biscoito recheado":"Biscoito simples"),
+    "Final: "+fmt(dados.produtoFinalKg,2)+" kg",
+    "Pacotes: "+inteiro(dados.pacotes),
+    "Caixas: "+inteiro(dados.caixas)
+  ];
+  linhas.forEach((l,i)=>ctx.fillText(l,x+16,y+56+i*19));
+  ctx.restore();
+}
+
+function drawQualityPanel(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="rgba(8,17,31,.92)";
+  ctx.strokeStyle="#7db8ff";
+  ctx.lineWidth=2;
+  roundRect(ctx,x,y,w,h,16,true,true);
+  ctx.fillStyle="#cfe6ff";
+  ctx.font="bold 17px Arial";
+  ctx.fillText("Qualidade e massa",x+16,y+28);
+  ctx.fillStyle="#eaf5ff";
+  ctx.font="14px Arial";
+  const linhas=[
+    "Massa: "+dados.massaNome,
+    "Perfil: "+dados.massaPerfil,
+    "Desenvolvimento: "+fmt(dados.desenvolvimento,0)+"%",
+    "Gargalo: "+dados.gargalo
+  ];
+  linhas.forEach((l,i)=>ctx.fillText(l,x+16,y+56+i*19));
+  ctx.restore();
+}
+
+function drawTimePanel(ctx,x,y,w,h){
+  ctx.save();
+  ctx.fillStyle="rgba(8,17,31,.92)";
+  ctx.strokeStyle="#83f6a5";
+  ctx.lineWidth=2;
+  roundRect(ctx,x,y,w,h,16,true,true);
+  ctx.fillStyle="#bbf7d0";
+  ctx.font="bold 17px Arial";
+  ctx.fillText("Tempo de processo",x+16,y+28);
+  ctx.fillStyle="#eaf5ff";
+  ctx.font="14px Arial";
+  const linhas=[
+    "Forno: "+fmt(dados.tempoForno,2)+" min",
+    "Resfriamento: "+fmt(dados.tempoResfriamento,2)+" min",
+    "Forno padrão: "+fmt(dados.tempoFornoPadrao,1)+" min",
+    "Frio padrão: "+fmt(dados.tempoResfriamentoPadrao,1)+" min"
+  ];
+  linhas.forEach((l,i)=>ctx.fillText(l,x+16,y+56+i*19));
+  ctx.restore();
+}
+
+function atualizarRelatorio(){
+  calcular();
+  document.getElementById("repData").innerHTML = "Data de emissão: " + new Date().toLocaleString("pt-BR");
+  document.getElementById("repProduto").innerHTML = v("produto") || "-";
+  document.getElementById("repLote").innerHTML = v("lote") || "-";
+  document.getElementById("repOperador").innerHTML = v("operador") || "-";
+  document.getElementById("repTurno").innerHTML = v("turno") || "-";
+
+  document.getElementById("repTipoLinha").innerHTML = dados.tipoLinha === "recheado" ? "Biscoito recheado" : "Produção total simples";
+  document.getElementById("repMassa").innerHTML = fmt(dados.massaTotalKg,1)+" kg";
+  document.getElementById("repFinal").innerHTML = fmt(dados.produtoFinalKg,2)+" kg";
+  document.getElementById("repPacotes").innerHTML = inteiro(dados.pacotes);
+  document.getElementById("repForno").innerHTML = fmt(dados.tempoForno,2)+" min";
+  document.getElementById("repFrio").innerHTML = fmt(dados.tempoResfriamento,2)+" min";
+  document.getElementById("repDesenvolvimento").innerHTML = fmt(dados.desenvolvimento,0)+"%";
+  document.getElementById("repGargalo").innerHTML = dados.gargalo;
+
+  let recheado = "";
+  if(dados.tipoLinha === "recheado"){
+    recheado = `
+      <tr><td>Recheio disponível</td><td>${fmt(dados.recheioDisponivelKg,2)} kg</td><td>Após perda de ${fmt(dados.perdaRecheio,1)}%.</td></tr>
+      <tr><td>Recheio usado</td><td>${fmt(dados.recheioUsadoKg,2)} kg</td><td>${fmt(dados.gRecheio,2)} g por sanduíche.</td></tr>
+      <tr><td>Capacidade da recheadora</td><td>${inteiro(dados.sanduichesPorRecheadora)}</td><td>${fmt(dados.capRecheadora,0)} sanduíches/min.</td></tr>
+    `;
+  }
+
+  document.getElementById("repTabela").innerHTML = `
+    <tr><td>Bateladas</td><td>${inteiro(dados.qtdBateladas)} × ${fmt(dados.kgBatelada,1)} kg</td><td>Total: ${fmt(dados.massaTotalKg,1)} kg.</td></tr>
+    <tr><td>Condição da massa</td><td>${dados.massaNome}</td><td>${dados.massaDetalhe}</td></tr>
+    <tr><td>Peso corrigido</td><td>${fmt(dados.gCru,2)} g cru / ${fmt(dados.gAssado,2)} g assado</td><td>Considera espessura e condição da massa.</td></tr>
+    <tr><td>Peças pela massa</td><td>${inteiro(dados.pecasPossiveisMassa)}</td><td>Limite pela quantidade de massa.</td></tr>
+    <tr><td>Peças pela linha</td><td>${inteiro(dados.pecasPossiveisLinha)}</td><td>${inteiro(dados.formas)} formas × ${fmt(dados.rpm,1)} RPM × ${fmt(dados.tempoProducao,1)} min.</td></tr>
+    <tr><td>Peças formadas</td><td>${inteiro(dados.pecasFormadas)}</td><td>Menor valor entre massa e linha.</td></tr>
+    <tr><td>Tempo forno</td><td>${fmt(dados.tempoForno,2)} min</td><td>${dados.stForno.nome}: ${dados.stForno.detalhe}</td></tr>
+    <tr><td>Tempo resfriamento</td><td>${fmt(dados.tempoResfriamento,2)} min</td><td>${dados.stFrio.nome}: ${dados.stFrio.detalhe}</td></tr>
+    ${recheado}
+    <tr><td>Produção final</td><td>${fmt(dados.produtoFinalKg,2)} kg</td><td>${dados.detalheFinal}.</td></tr>
+    <tr><td>Pacotes e caixas</td><td>${inteiro(dados.pacotes)} pacotes</td><td>${inteiro(dados.caixas)} caixas + ${inteiro(dados.pacotesSoltos)} pacotes soltos.</td></tr>
+    <tr><td>Gargalo</td><td>${dados.gargalo}</td><td>Indica onde a linha limita a produção.</td></tr>
+  `;
+}
+
+function imprimirRelatorio(){
+  atualizarRelatorio();
+  setTimeout(()=>window.print(),200);
+}
+
+function exemploSimples(){
+  document.getElementById("produto").value="Biscoito simples";
+  document.getElementById("lote").value="OP-SIMPLES-001";
+  document.getElementById("tipoLinha").value="total";
+  trocarLinha();
+  document.getElementById("qtdBateladas").value=3;
+  document.getElementById("kgBatelada").value=220;
+  document.getElementById("condMassa").value="ideal";
+  document.getElementById("espessura").value=4.0;
+  document.getElementById("gCru").value=7.8;
+  document.getElementById("gAssado").value=6.6;
+  document.getElementById("formas").value=90;
+  document.getElementById("rpm").value=30;
+  document.getElementById("tempoProducao").value=45;
+  document.getElementById("perdaGeral").value=2;
+  document.getElementById("compForno").value=42;
+  document.getElementById("velForno").value=6.8;
+  document.getElementById("tempoFornoPadrao").value=6.2;
+  document.getElementById("compResfriamento").value=55;
+  document.getElementById("velResfriamento").value=7.5;
+  document.getElementById("pesoPacote").value=300;
+  document.getElementById("pacotesCaixa").value=20;
+  calcular();
+}
+
+function exemploRecheado(){
+  document.getElementById("produto").value="Biscoito recheado";
+  document.getElementById("lote").value="OP-RECH-001";
+  document.getElementById("tipoLinha").value="recheado";
+  trocarLinha();
+  document.getElementById("qtdBateladas").value=4;
+  document.getElementById("kgBatelada").value=250;
+  document.getElementById("condMassa").value="dura";
+  document.getElementById("espessura").value=4.4;
+  document.getElementById("gCru").value=8.5;
+  document.getElementById("gAssado").value=7.2;
+  document.getElementById("formas").value=96;
+  document.getElementById("rpm").value=28;
+  document.getElementById("tempoProducao").value=60;
+  document.getElementById("perdaGeral").value=2.5;
+  document.getElementById("compForno").value=45;
+  document.getElementById("velForno").value=7;
+  document.getElementById("tempoFornoPadrao").value=6.5;
+  document.getElementById("tempForno").value=185;
+  document.getElementById("compResfriamento").value=65;
+  document.getElementById("velResfriamento").value=8;
+  document.getElementById("tempoResfriamentoPadrao").value=8;
+  document.getElementById("tempAntesRecheio").value=32;
+  document.getElementById("gRecheio").value=5.5;
+  document.getElementById("kgRecheio").value=450;
+  document.getElementById("perdaRecheio").value=1.8;
+  document.getElementById("capRecheadora").value=220;
+  document.getElementById("pesoPacote").value=300;
+  document.getElementById("pacotesCaixa").value=20;
+  calcular();
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+
+function mix(c1,c2,p){
+  const a=hexToRgb(c1),b=hexToRgb(c2);
+  const r=Math.round(a.r+(b.r-a.r)*p);
+  const g=Math.round(a.g+(b.g-a.g)*p);
+  const bl=Math.round(a.b+(b.b-a.b)*p);
+  return `rgb(${r},${g},${bl})`;
+}
+
+function hexToRgb(hex){
+  const v=parseInt(hex.replace("#",""),16);
+  return {r:v>>16,g:(v>>8)&255,b:v&255};
+}
+
+document.querySelectorAll("input,select").forEach(el=>{
+  el.addEventListener("input",calcular);
+  el.addEventListener("change",calcular);
+});
+
+trocarLinha();
+calcular();
+desenhar();
+</script>
+
+</body>
+</html>

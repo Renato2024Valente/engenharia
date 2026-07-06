@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Engenharia - Limites, Derivadas e Aplicações</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#07111f;color:#eef5ff}
+header{padding:28px;text-align:center;background:linear-gradient(135deg,#081525,#123b68,#07111f);border-bottom:3px solid #4aa3ff}
+header h1{margin:0;font-size:30px}
+header p{color:#cfe6ff}
+main{max-width:1200px;margin:auto;padding:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:#101b2d;border:1px solid #314760;border-radius:18px;padding:16px;box-shadow:0 0 22px rgba(0,0,0,.28)}
+h2{color:#8bd0ff;margin-top:0}
+label{display:block;margin-top:10px;font-weight:bold;color:#dcecff}
+input,select{width:100%;padding:11px;border-radius:11px;border:1px solid #46617d;background:#07111f;color:white;font-size:15px}
+button{width:100%;padding:12px;border:0;border-radius:12px;background:#2f80ed;color:white;font-weight:bold;margin-top:12px;cursor:pointer}
+button:hover{background:#56a3ff}
+.resultado{background:#07111f;border:1px solid #314760;border-radius:14px;padding:14px;line-height:1.6;min-height:230px}
+.formula{background:#081525;color:#ffe28a;border:1px solid #314760;padding:8px;border-radius:8px;font-family:Consolas,monospace;margin-top:6px}
+canvas{width:100%;height:400px;background:#fff;border-radius:14px}
+a{color:#8bd0ff}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>Engenharia Matemática Aplicada</h1>
+<p>Limites, derivadas e segunda derivada aplicadas à produção, processo, mecânica, elétrica e civil</p>
+</header>
+<main>
+<div class="grid">
+<section class="card">
+<h2>Entrada</h2>
+<label>Área</label>
+<select id="area">
+<option value="producao">Engenharia de Produção</option>
+<option value="mecanica">Engenharia Mecânica</option>
+<option value="eletrica">Engenharia Elétrica</option>
+<option value="civil">Engenharia Civil</option>
+<option value="quimica">Engenharia Química</option>
+</select>
+<label>Função f(x)</label>
+<input id="funcao" value="0.05*x^2 + 20*x + 500">
+<label>Ponto x</label>
+<input id="a" type="number" step="any" value="100">
+<label>Início gráfico</label>
+<input id="xmin" type="number" step="any" value="0">
+<label>Fim gráfico</label>
+<input id="xmax" type="number" step="any" value="200">
+<button onclick="calcular()">Calcular</button>
+<button onclick="exemploProcesso()">Exemplo custo de produção</button>
+<button onclick="exemploVelocidade()">Exemplo posição/velocidade</button>
+<div class="formula">derivada ≈ taxa de variação instantânea</div>
+</section>
+<section class="card">
+<h2>Resultado</h2>
+<div id="resultado" class="resultado">Clique em calcular.</div>
+</section>
+</div>
+<section class="card" style="margin-top:16px">
+<h2>Gráfico</h2>
+<canvas id="grafico" width="1000" height="400"></canvas>
+</section>
+</main>
+<script>
+function normalizar(e){return e.toLowerCase().replaceAll("^","**")}
+function criar(e){
+ e=normalizar(e);
+ const proibidos=["window","document","eval","function","constructor","fetch","alert","prompt"];
+ for(let p of proibidos){if(e.includes(p))throw new Error("Expressão não permitida.")}
+ const permitidas=["x","sin","cos","tan","sqrt","abs","log","log10","exp","pow","pi","e","min","max"];
+ const nomes=e.match(/[a-zA-Z_]+/g)||[];
+ for(let n of nomes){if(!permitidas.includes(n))throw new Error("Função não permitida: "+n)}
+ return new Function("x","sin","cos","tan","sqrt","abs","log","log10","exp","pow","pi","e","min","max","return "+e)
+}
+function fValor(fn,x){let y=fn(x,Math.sin,Math.cos,Math.tan,Math.sqrt,Math.abs,Math.log,Math.log10,Math.exp,Math.pow,Math.PI,Math.E,Math.min,Math.max);return isFinite(y)?y:NaN}
+function fmt(n){return isFinite(n)?Number(n).toFixed(6):"indefinido"}
+function d1(fn,a){let h=Math.max(1e-5,Math.abs(a)*1e-5);return (fValor(fn,a+h)-fValor(fn,a-h))/(2*h)}
+function d2(fn,a){let h=Math.max(1e-4,Math.abs(a)*1e-4);return (fValor(fn,a+h)-2*fValor(fn,a)+fValor(fn,a-h))/(h*h)}
+function limite(fn,a){let h=1e-6*Math.max(1,Math.abs(a));let l=fValor(fn,a-h),r=fValor(fn,a+h);return Math.abs(l-r)<1e-3*Math.max(1,Math.abs(l),Math.abs(r))?(l+r)/2:NaN}
+function interpretar(area,der,seg){
+ let t="";
+ if(area==="producao")t="Na produção, a derivada pode representar custo marginal, produtividade marginal ou variação do consumo.";
+ if(area==="mecanica")t="Na mecânica, se f(x) for posição, a derivada representa velocidade e a segunda derivada representa aceleração.";
+ if(area==="eletrica")t="Na elétrica, a derivada representa variação instantânea de carga, tensão, corrente ou sinal.";
+ if(area==="civil")t="Na civil, a derivada pode representar inclinação e a segunda derivada pode indicar curvatura/deformação.";
+ if(area==="quimica")t="Na química, a derivada pode indicar velocidade de reação, variação de temperatura, concentração ou pressão.";
+ return t+"<br><br>"+(der>0?"A função cresce no ponto.":der<0?"A função diminui no ponto.":"Possível ponto crítico.")+" "+(seg>0?"Concavidade para cima.":seg<0?"Concavidade para baixo.":"Segunda derivada próxima de zero.");
+}
+function calcular(){
+ try{
+  const expr=document.getElementById("funcao").value;
+  const a=Number(document.getElementById("a").value);
+  const area=document.getElementById("area").value;
+  const fn=criar(expr);
+  const fa=fValor(fn,a), der=d1(fn,a), seg=d2(fn,a), lim=limite(fn,a);
+  document.getElementById("resultado").innerHTML=
+  "<strong>f("+a+"):</strong> "+fmt(fa)+"<br><strong>Limite:</strong> "+fmt(lim)+"<br><strong>f'("+a+"):</strong> "+fmt(der)+"<br><strong>f''("+a+"):</strong> "+fmt(seg)+"<br><br><strong>Reta tangente:</strong><div class='formula'>y = "+fmt(fa)+" + "+fmt(der)+"(x - "+a+")</div><br>"+interpretar(area,der,seg);
+  grafico(fn,a,fa,der);
+ }catch(e){document.getElementById("resultado").innerHTML="<span style='color:#ff7777'>Erro: "+e.message+"</span>"}
+}
+function grafico(fn,a,fa,der){
+ const c=document.getElementById("grafico"),ctx=c.getContext("2d"),W=c.width,H=c.height;
+ ctx.clearRect(0,0,W,H);
+ let xmin=Number(document.getElementById("xmin").value),xmax=Number(document.getElementById("xmax").value);
+ let pts=[],ymin=Infinity,ymax=-Infinity;
+ for(let i=0;i<=W;i++){let x=xmin+(i/W)*(xmax-xmin),y=fValor(fn,x);if(isFinite(y)){pts.push({x,y});ymin=Math.min(ymin,y);ymax=Math.max(ymax,y)}}
+ let m=(ymax-ymin)*.15||1;ymin-=m;ymax+=m;
+ const px=x=>(x-xmin)/(xmax-xmin)*W, py=y=>H-(y-ymin)/(ymax-ymin)*H;
+ ctx.strokeStyle="#ddd";ctx.lineWidth=1;
+ if(xmin<0&&xmax>0){ctx.beginPath();ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke()}
+ if(ymin<0&&ymax>0){ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.stroke()}
+ ctx.strokeStyle="#1565c0";ctx.lineWidth=3;ctx.beginPath();
+ pts.forEach((p,i)=>i?ctx.lineTo(px(p.x),py(p.y)):ctx.moveTo(px(p.x),py(p.y)));ctx.stroke();
+ ctx.strokeStyle="#00a152";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px(xmin),py(fa+der*(xmin-a)));ctx.lineTo(px(xmax),py(fa+der*(xmax-a)));ctx.stroke();
+ ctx.fillStyle="#d50000";ctx.beginPath();ctx.arc(px(a),py(fa),6,0,Math.PI*2);ctx.fill();
+}
+function exemploProcesso(){document.getElementById("area").value="producao";document.getElementById("funcao").value="0.05*x^2 + 20*x + 500";document.getElementById("a").value=100;document.getElementById("xmin").value=0;document.getElementById("xmax").value=200;calcular()}
+function exemploVelocidade(){document.getElementById("area").value="mecanica";document.getElementById("funcao").value="5*x^2 + 2*x + 1";document.getElementById("a").value=3;document.getElementById("xmin").value=0;document.getElementById("xmax").value=6;calcular()}
+calcular();
+</script>
+</body>
+</html>

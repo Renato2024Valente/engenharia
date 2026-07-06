@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Auditoria de Processos - Linhas de Fabricação</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#07111f;
+  --card:#101b2d;
+  --line:#314760;
+  --text:#f2f7ff;
+  --muted:#b9d2ec;
+  --gold:#f0b35b;
+  --blue:#58b7ff;
+  --green:#58f2a1;
+  --yellow:#ffe36d;
+  --red:#ff7777;
+}
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(88,183,255,.15), transparent 35%),
+    radial-gradient(circle at top right, rgba(240,179,91,.14), transparent 35%),
+    linear-gradient(135deg,#030712,#07111f,#111827);
+  color:var(--text);
+}
+header{
+  padding:24px 14px;
+  text-align:center;
+  background:linear-gradient(135deg,#081525,#4b2a0c,#07111f);
+  border-bottom:3px solid var(--gold);
+}
+header h1{margin:0;font-size:29px}
+header p{margin:8px 0 0;color:#ffe0b5}
+main{max-width:1500px;margin:auto;padding:16px}
+.layout{
+  display:grid;
+  grid-template-columns:430px 1fr;
+  gap:16px;
+}
+.card{
+  background:rgba(16,27,45,.88);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 0 22px rgba(0,0,0,.28);
+}
+h2{margin:0 0 12px;color:#ffd08a;font-size:20px}
+h3{margin:18px 0 8px;color:#e9f2ff;font-size:16px}
+label{
+  display:block;
+  margin-top:10px;
+  margin-bottom:4px;
+  color:#dcecff;
+  font-weight:bold;
+  font-size:14px;
+}
+input,select,textarea{
+  width:100%;
+  padding:11px;
+  border-radius:11px;
+  border:1px solid #46617d;
+  background:#07111f;
+  color:white;
+  outline:none;
+  font-size:15px;
+}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#e98725;
+  color:#111827;
+  font-weight:bold;
+  margin-top:12px;
+  cursor:pointer;
+  font-size:15px;
+}
+button:hover{background:#ffb55b}
+.btnGreen{background:#2bb673;color:#06111f}
+.btnGreen:hover{background:#5bf0a5}
+.btnBlue{background:#2f80ed;color:#fff}
+.btnBlue:hover{background:#56a3ff}
+.btnRed{background:#ff7777;color:#111827}
+.btnRed:hover{background:#ff9999}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.resultGrid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+.metric{
+  background:#07111f;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:13px;
+  min-height:108px;
+}
+.metric .title{color:var(--muted);font-size:13px;margin-bottom:7px}
+.metric .value{color:#fff;font-size:25px;font-weight:bold}
+.metric .small{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.35}
+.bigFace{
+  font-size:48px;
+  line-height:1;
+}
+#canvas{
+  width:100%;
+  height:420px;
+  display:block;
+  background:linear-gradient(#fff7e8,#dcecff);
+  border:1px solid #8bb7db;
+  border-radius:18px;
+}
+.chartGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:16px;
+}
+.chartBox{
+  background:#07111f;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+}
+.chartBox canvas{
+  width:100%;
+  height:260px;
+  background:white;
+  border-radius:14px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  overflow:hidden;
+  border-radius:12px;
+  font-size:13px;
+}
+th,td{
+  padding:9px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  vertical-align:top;
+}
+th{background:#142a42;color:#ffe0b5}
+td{background:#081525;color:#e8f3ff}
+.pill{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  font-weight:bold;
+  color:#111827;
+  white-space:nowrap;
+}
+.ok{background:var(--green)}
+.warn{background:var(--yellow)}
+.bad{background:var(--red)}
+.neutral{background:#d1d5db}
+.blue{background:#93c5fd}
+.explain{
+  background:#07111f;
+  border-left:5px solid #e98725;
+  border-radius:12px;
+  padding:12px;
+  margin-top:12px;
+  color:#dcecff;
+  line-height:1.5;
+}
+.formula{
+  background:#091426;
+  color:#ffdf93;
+  border:1px solid #304969;
+  padding:8px;
+  border-radius:8px;
+  font-family:Consolas, monospace;
+  overflow:auto;
+  margin-top:6px;
+}
+.tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-bottom:12px;
+}
+.tabs button{
+  margin:0;
+  background:#20334d;
+  color:#eaf5ff;
+}
+.tabs button.active{background:#e98725;color:#111827}
+.hidden{display:none}
+footer{text-align:center;padding:18px;color:#adc2d6}
+.printOnly,.reportBox{display:none}
+
+@media(max-width:1120px){
+  .layout{grid-template-columns:1fr}
+  .resultGrid{grid-template-columns:1fr 1fr}
+  .chartGrid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  .row,.row3,.resultGrid,.tabs{grid-template-columns:1fr}
+  header h1{font-size:22px}
+  #canvas{height:360px}
+}
+@media print{
+  body{background:white!important;color:#111827!important}
+  header,footer,.layout{display:none!important}
+  main{max-width:100%;padding:0;margin:0}
+  .printOnly,.reportBox{display:block!important}
+  .reportBox{
+    background:white!important;
+    color:#111827!important;
+    padding:20px;
+    font-family:Arial, Helvetica, sans-serif;
+  }
+  .reportHeader{
+    border-bottom:3px solid #111827;
+    padding-bottom:10px;
+    margin-bottom:12px;
+    text-align:center;
+  }
+  .reportHeader h1{margin:0;font-size:22px}
+  .reportHeader p{margin:4px 0;font-size:13px}
+  .reportGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+  }
+  .reportCard{
+    border:1px solid #333;
+    border-radius:8px;
+    padding:8px;
+    min-height:48px;
+  }
+  .reportCard strong{display:block;font-size:12px;color:#333;margin-bottom:4px}
+  .reportCard span{font-size:16px;font-weight:bold}
+  .reportTable{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
+    font-size:11px;
+  }
+  .reportTable th,.reportTable td{
+    border:1px solid #333;
+    padding:6px;
+    color:#111827!important;
+    background:white!important;
+  }
+  .reportTable th{background:#eeeeee!important}
+  .assinaturas{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+    margin-top:50px;
+    font-size:12px;
+  }
+  .linhaAss{
+    border-top:1px solid #111827;
+    text-align:center;
+    padding-top:6px;
+  }
+  @page{size:A4;margin:10mm}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Auditoria de Processos da Fabricação</h1>
+  <p>Verificação de padrões das linhas, quebra de água, moldagem, forneamento, empacotamento, gráficos e relatório</p>
+</header>
+
+<main>
+  <div class="layout">
+    <section class="card">
+      <h2>Cadastro da auditoria</h2>
+
+      <div class="tabs">
+        <button id="tabBtn1" class="active" onclick="abrirTab(1)">1. Linha</button>
+        <button id="tabBtn2" onclick="abrirTab(2)">2. Padrões</button>
+        <button id="tabBtn3" onclick="abrirTab(3)">3. Auditoria</button>
+      </div>
+
+      <div id="tab1">
+        <h3>Adicionar linha de fabricação</h3>
+        <div class="row">
+          <div>
+            <label>Nome da linha</label>
+            <input id="novaLinha" value="Linha 01">
+          </div>
+          <div>
+            <label>Tipo</label>
+            <select id="tipoLinha">
+              <option>Biscoito moldado</option>
+              <option>Biscoito recheado</option>
+              <option>Biscoito laminado</option>
+              <option>Wafer</option>
+              <option>Outra linha</option>
+            </select>
+          </div>
+        </div>
+        <button class="btnBlue" onclick="adicionarLinha()">Adicionar linha</button>
+
+        <h3>Linhas cadastradas</h3>
+        <table>
+          <thead><tr><th>Linha</th><th>Tipo</th><th>Ação</th></tr></thead>
+          <tbody id="tabelaLinhas"></tbody>
+        </table>
+
+        <div class="explain">
+          Cadastre quantas linhas quiser. Depois escolha a linha na aba de auditoria para registrar os dados.
+        </div>
+      </div>
+
+      <div id="tab2" class="hidden">
+        <h3>Padrões da linha</h3>
+
+        <div class="row">
+          <div>
+            <label>Linha para configurar</label>
+            <select id="linhaPadrao"></select>
+          </div>
+          <div>
+            <label>Produto padrão</label>
+            <input id="produtoPadrao" value="Biscoito">
+          </div>
+        </div>
+
+        <h3>Moldagem</h3>
+        <div class="row">
+          <div>
+            <label>Peso cru padrão (g)</label>
+            <input id="padPesoCru" type="number" step="0.01" value="8.5">
+          </div>
+          <div>
+            <label>Tolerância peso cru (%)</label>
+            <input id="tolPesoCru" type="number" step="0.1" value="5">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Espessura padrão (mm)</label>
+            <input id="padEspessura" type="number" step="0.01" value="4.2">
+          </div>
+          <div>
+            <label>Tolerância espessura (%)</label>
+            <input id="tolEspessura" type="number" step="0.1" value="7">
+          </div>
+        </div>
+
+        <h3>Forneamento e quebra de água</h3>
+        <div class="row">
+          <div>
+            <label>Peso assado padrão (g)</label>
+            <input id="padPesoAssado" type="number" step="0.01" value="7.2">
+          </div>
+          <div>
+            <label>Quebra de água padrão (%)</label>
+            <input id="padQuebraAgua" type="number" step="0.1" value="15.3">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Tolerância quebra de água (%)</label>
+            <input id="tolQuebraAgua" type="number" step="0.1" value="10">
+          </div>
+          <div>
+            <label>Umidade máxima (%)</label>
+            <input id="padUmidadeMax" type="number" step="0.1" value="3.5">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Tempo forno padrão (min)</label>
+            <input id="padTempoForno" type="number" step="0.1" value="6.5">
+          </div>
+          <div>
+            <label>Tolerância tempo forno (%)</label>
+            <input id="tolTempoForno" type="number" step="0.1" value="8">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Temperatura forno padrão (°C)</label>
+            <input id="padTempForno" type="number" step="1" value="185">
+          </div>
+          <div>
+            <label>Tolerância temperatura (°C)</label>
+            <input id="tolTempForno" type="number" step="1" value="8">
+          </div>
+        </div>
+
+        <h3>Empacotamento e entrega</h3>
+        <div class="row">
+          <div>
+            <label>Peso pacote padrão (g)</label>
+            <input id="padPesoPacote" type="number" step="1" value="300">
+          </div>
+          <div>
+            <label>Tolerância pacote (%)</label>
+            <input id="tolPesoPacote" type="number" step="0.1" value="2">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Pacotes/min padrão</label>
+            <input id="padPacotesMin" type="number" step="0.1" value="90">
+          </div>
+          <div>
+            <label>Entrega planejada (kg)</label>
+            <input id="padEntregaKg" type="number" step="0.1" value="1000">
+          </div>
+        </div>
+
+        <button class="btnGreen" onclick="salvarPadrao()">Salvar padrão da linha</button>
+
+        <div class="explain">
+          A auditoria vai comparar os dados reais com estes padrões.
+          <div class="formula">quebra de água = (peso cru - peso assado) ÷ peso cru × 100</div>
+        </div>
+      </div>
+
+      <div id="tab3" class="hidden">
+        <h3>Dados da auditoria</h3>
+
+        <div class="row">
+          <div>
+            <label>Linha auditada</label>
+            <select id="linhaAuditoria" onchange="carregarPadraoLinha()"></select>
+          </div>
+          <div>
+            <label>Auditor</label>
+            <input id="auditor" value="">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Turno</label>
+            <input id="turno" value="1º Turno">
+          </div>
+          <div>
+            <label>Lote / OP</label>
+            <input id="lote" value="OP-001">
+          </div>
+        </div>
+
+        <h3>Moldagem real</h3>
+        <div class="row">
+          <div>
+            <label>Peso cru real (g)</label>
+            <input id="realPesoCru" type="number" step="0.01" value="8.4">
+          </div>
+          <div>
+            <label>Espessura real (mm)</label>
+            <input id="realEspessura" type="number" step="0.01" value="4.1">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Peças deformadas (%)</label>
+            <input id="realDeformadas" type="number" step="0.1" value="1.5">
+          </div>
+          <div>
+            <label>Quebra na moldagem (%)</label>
+            <input id="realQuebraMoldagem" type="number" step="0.1" value="1">
+          </div>
+        </div>
+
+        <h3>Forneamento real</h3>
+        <div class="row">
+          <div>
+            <label>Peso assado real (g)</label>
+            <input id="realPesoAssado" type="number" step="0.01" value="7.2">
+          </div>
+          <div>
+            <label>Umidade real (%)</label>
+            <input id="realUmidade" type="number" step="0.1" value="3.2">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Tempo forno real (min)</label>
+            <input id="realTempoForno" type="number" step="0.1" value="6.5">
+          </div>
+          <div>
+            <label>Temperatura real (°C)</label>
+            <input id="realTempForno" type="number" step="1" value="184">
+          </div>
+        </div>
+
+        <h3>Empacotamento e entrega</h3>
+        <div class="row">
+          <div>
+            <label>Peso pacote real (g)</label>
+            <input id="realPesoPacote" type="number" step="1" value="300">
+          </div>
+          <div>
+            <label>Pacotes/min real</label>
+            <input id="realPacotesMin" type="number" step="0.1" value="88">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Kg entregues na fabricação</label>
+            <input id="realEntregaKg" type="number" step="0.1" value="980">
+          </div>
+          <div>
+            <label>Reprocesso/refugo (%)</label>
+            <input id="realRefugo" type="number" step="0.1" value="1.2">
+          </div>
+        </div>
+
+        <label>Observações da auditoria</label>
+        <textarea id="observacoes" placeholder="Exemplo: cor dentro do padrão, esteira estável, selagem correta..."></textarea>
+
+        <button onclick="calcularAuditoria()">Calcular auditoria</button>
+        <button class="btnGreen" onclick="salvarAuditoria()">Salvar auditoria</button>
+        <button class="btnBlue" onclick="imprimirRelatorio()">Imprimir relatório</button>
+        <button class="btnRed" onclick="limparAuditorias()">Limpar auditorias salvas</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>Painel da auditoria</h2>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Situação geral</div>
+            <div id="rFace" class="value bigFace">😐</div>
+            <div id="rStatus" class="small">Sem auditoria calculada</div>
+          </div>
+          <div class="metric">
+            <div class="title">Conformidade geral</div>
+            <div id="rGeral" class="value">--</div>
+            <div id="rGeralDetalhe" class="small">Média ponderada dos setores</div>
+          </div>
+          <div class="metric">
+            <div class="title">Quebra de água</div>
+            <div id="rAgua" class="value">--</div>
+            <div id="rAguaDetalhe" class="small">Peso cru para assado</div>
+          </div>
+          <div class="metric">
+            <div class="title">Entrega da fabricação</div>
+            <div id="rEntrega" class="value">--</div>
+            <div id="rEntregaDetalhe" class="small">Real x planejado</div>
+          </div>
+        </div>
+
+        <div class="resultGrid">
+          <div class="metric">
+            <div class="title">Moldagem</div>
+            <div id="rMoldagem" class="value">--</div>
+            <div id="rMoldagemDetalhe" class="small">Peso cru, espessura e deformação</div>
+          </div>
+          <div class="metric">
+            <div class="title">Forneamento</div>
+            <div id="rForno" class="value">--</div>
+            <div id="rFornoDetalhe" class="small">Forno, umidade e água</div>
+          </div>
+          <div class="metric">
+            <div class="title">Empacotamento</div>
+            <div id="rEmpacotamento" class="value">--</div>
+            <div id="rEmpDetalhe" class="small">Peso pacote, pacotes/min e refugo</div>
+          </div>
+          <div class="metric">
+            <div class="title">Resultado</div>
+            <div id="rResultado" class="value">--</div>
+            <div id="rResultadoDetalhe" class="small">Aprovado, atenção ou fora padrão</div>
+          </div>
+        </div>
+
+        <canvas id="canvas" width="1060" height="420"></canvas>
+      </div>
+
+      <div class="chartGrid">
+        <div class="chartBox">
+          <h2>Gráfico de conformidade por setor</h2>
+          <canvas id="chartSetores" width="700" height="260"></canvas>
+        </div>
+        <div class="chartBox">
+          <h2>Gráfico de entrega da fabricação</h2>
+          <canvas id="chartEntrega" width="700" height="260"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>Auditorias salvas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Linha</th>
+              <th>Geral</th>
+              <th>Moldagem</th>
+              <th>Forno</th>
+              <th>Empac.</th>
+              <th>Entrega</th>
+              <th>Face</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaAuditorias"></tbody>
+        </table>
+
+        <div class="explain">
+          <strong>Critério dos rostinhos:</strong><br>
+          😃 acima de 90% = dentro do padrão. 😐 entre 75% e 89% = atenção. 😢 abaixo de 75% = fora do padrão.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section id="relatorioImpressao" class="printOnly reportBox">
+    <div class="reportHeader">
+      <h1>RELATÓRIO DE AUDITORIA DE PROCESSOS</h1>
+      <p>Moldagem, forneamento, quebra de água, empacotamento e entrega da fabricação</p>
+      <p id="repData">Data: --</p>
+    </div>
+
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Linha</strong><span id="repLinha">--</span></div>
+      <div class="reportCard"><strong>Produto</strong><span id="repProduto">--</span></div>
+      <div class="reportCard"><strong>Lote / OP</strong><span id="repLote">--</span></div>
+      <div class="reportCard"><strong>Auditor / turno</strong><span id="repAuditor">--</span></div>
+    </div>
+
+    <h2 style="color:#111827;margin-top:16px;">Resumo da auditoria</h2>
+    <div class="reportGrid">
+      <div class="reportCard"><strong>Situação</strong><span id="repFace">--</span></div>
+      <div class="reportCard"><strong>Conformidade geral</strong><span id="repGeral">--</span></div>
+      <div class="reportCard"><strong>Moldagem</strong><span id="repMoldagem">--</span></div>
+      <div class="reportCard"><strong>Forneamento</strong><span id="repForno">--</span></div>
+      <div class="reportCard"><strong>Empacotamento</strong><span id="repEmp">--</span></div>
+      <div class="reportCard"><strong>Quebra de água</strong><span id="repAgua">--</span></div>
+      <div class="reportCard"><strong>Entrega</strong><span id="repEntrega">--</span></div>
+      <div class="reportCard"><strong>Resultado</strong><span id="repResultado">--</span></div>
+    </div>
+
+    <table class="reportTable">
+      <thead>
+        <tr>
+          <th>Setor</th>
+          <th>Dados auditados</th>
+          <th>Padrão</th>
+          <th>Situação</th>
+        </tr>
+      </thead>
+      <tbody id="repTabela"></tbody>
+    </table>
+
+    <h2 style="color:#111827;margin-top:16px;">Observações</h2>
+    <table class="reportTable">
+      <tbody>
+        <tr><td id="repObs">--</td></tr>
+      </tbody>
+    </table>
+
+    <div class="assinaturas">
+      <div class="linhaAss">Assinatura do auditor</div>
+      <div class="linhaAss">Responsável da fabricação</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Sistema de auditoria HTML + CSS + JavaScript para linhas de fabricação
+</footer>
+
+<script>
+let linhas = [];
+let auditorias = [];
+let resultadoAtual = null;
+let t = 0;
+
+function n(id){ return Number(document.getElementById(id).value); }
+function v(id){ return (document.getElementById(id).value || "").trim(); }
+function fmt(num, casas=2){
+  if(!isFinite(num)) return "0";
+  return num.toLocaleString("pt-BR",{minimumFractionDigits:casas,maximumFractionDigits:casas});
+}
+function inteiro(num){
+  if(!isFinite(num)) return "0";
+  return Math.floor(num).toLocaleString("pt-BR");
+}
+function txt(id, valor){ document.getElementById(id).innerHTML = valor; }
+
+function carregar(){
+  linhas = JSON.parse(localStorage.getItem("auditoria_linhas_2026") || "[]");
+  auditorias = JSON.parse(localStorage.getItem("auditoria_registros_2026") || "[]");
+
+  if(linhas.length === 0){
+    linhas.push(criarLinhaPadrao("Linha 01","Biscoito moldado"));
+    linhas.push(criarLinhaPadrao("Linha 02","Biscoito recheado"));
+    salvarLocal();
+  }
+
+  renderizarLinhas();
+  renderizarAuditorias();
+  carregarPadraoLinha();
+  calcularAuditoria();
+}
+
+function salvarLocal(){
+  localStorage.setItem("auditoria_linhas_2026", JSON.stringify(linhas));
+  localStorage.setItem("auditoria_registros_2026", JSON.stringify(auditorias));
+}
+
+function criarLinhaPadrao(nome,tipo){
+  return {
+    id: Date.now() + "_" + Math.random().toString(16).slice(2),
+    nome, tipo,
+    padrao:{
+      produto:"Biscoito",
+      pesoCru:8.5, tolPesoCru:5,
+      espessura:4.2, tolEspessura:7,
+      pesoAssado:7.2,
+      quebraAgua:15.3, tolQuebraAgua:10,
+      umidadeMax:3.5,
+      tempoForno:6.5, tolTempoForno:8,
+      tempForno:185, tolTempForno:8,
+      pesoPacote:300, tolPesoPacote:2,
+      pacotesMin:90,
+      entregaKg:1000
+    }
+  };
+}
+
+function abrirTab(num){
+  for(let i=1;i<=3;i++){
+    document.getElementById("tab"+i).classList.toggle("hidden", i!==num);
+    document.getElementById("tabBtn"+i).classList.toggle("active", i===num);
+  }
+}
+
+function adicionarLinha(){
+  const nome = v("novaLinha") || "Linha";
+  const tipo = v("tipoLinha") || "Biscoito";
+  linhas.push(criarLinhaPadrao(nome,tipo));
+  salvarLocal();
+  renderizarLinhas();
+  renderizarAuditorias();
+}
+
+function excluirLinha(id){
+  if(!confirm("Excluir esta linha?")) return;
+  linhas = linhas.filter(l => l.id !== id);
+  if(linhas.length === 0) linhas.push(criarLinhaPadrao("Linha 01","Biscoito moldado"));
+  salvarLocal();
+  renderizarLinhas();
+  carregarPadraoLinha();
+}
+
+function renderizarLinhas(){
+  const tb = document.getElementById("tabelaLinhas");
+  tb.innerHTML = "";
+  linhas.forEach(l=>{
+    tb.innerHTML += `
+      <tr>
+        <td>${l.nome}</td>
+        <td>${l.tipo}</td>
+        <td><button class="btnRed" style="margin:0;padding:8px" onclick="excluirLinha('${l.id}')">Excluir</button></td>
+      </tr>`;
+  });
+
+  const selects = ["linhaPadrao","linhaAuditoria"];
+  selects.forEach(id=>{
+    const sel = document.getElementById(id);
+    const atual = sel.value;
+    sel.innerHTML = "";
+    linhas.forEach(l=>{
+      sel.innerHTML += `<option value="${l.id}">${l.nome} - ${l.tipo}</option>`;
+    });
+    if(linhas.some(l=>l.id===atual)) sel.value = atual;
+  });
+}
+
+function linhaSelecionada(selectId){
+  const id = document.getElementById(selectId).value;
+  return linhas.find(l=>l.id===id) || linhas[0];
+}
+
+function carregarPadraoLinha(){
+  const l = linhaSelecionada("linhaAuditoria");
+  if(!l) return;
+  const p = l.padrao;
+
+  document.getElementById("linhaPadrao").value = l.id;
+  document.getElementById("produtoPadrao").value = p.produto;
+  document.getElementById("padPesoCru").value = p.pesoCru;
+  document.getElementById("tolPesoCru").value = p.tolPesoCru;
+  document.getElementById("padEspessura").value = p.espessura;
+  document.getElementById("tolEspessura").value = p.tolEspessura;
+  document.getElementById("padPesoAssado").value = p.pesoAssado;
+  document.getElementById("padQuebraAgua").value = p.quebraAgua;
+  document.getElementById("tolQuebraAgua").value = p.tolQuebraAgua;
+  document.getElementById("padUmidadeMax").value = p.umidadeMax;
+  document.getElementById("padTempoForno").value = p.tempoForno;
+  document.getElementById("tolTempoForno").value = p.tolTempoForno;
+  document.getElementById("padTempForno").value = p.tempForno;
+  document.getElementById("tolTempForno").value = p.tolTempForno;
+  document.getElementById("padPesoPacote").value = p.pesoPacote;
+  document.getElementById("tolPesoPacote").value = p.tolPesoPacote;
+  document.getElementById("padPacotesMin").value = p.pacotesMin;
+  document.getElementById("padEntregaKg").value = p.entregaKg;
+
+  document.getElementById("realPesoCru").value = p.pesoCru;
+  document.getElementById("realEspessura").value = p.espessura;
+  document.getElementById("realPesoAssado").value = p.pesoAssado;
+  document.getElementById("realTempoForno").value = p.tempoForno;
+  document.getElementById("realTempForno").value = p.tempForno;
+  document.getElementById("realPesoPacote").value = p.pesoPacote;
+  document.getElementById("realPacotesMin").value = p.pacotesMin;
+  document.getElementById("realEntregaKg").value = p.entregaKg;
+
+  calcularAuditoria();
+}
+
+function salvarPadrao(){
+  const l = linhaSelecionada("linhaPadrao");
+  if(!l) return;
+
+  l.padrao = {
+    produto:v("produtoPadrao") || "Biscoito",
+    pesoCru:n("padPesoCru"), tolPesoCru:n("tolPesoCru"),
+    espessura:n("padEspessura"), tolEspessura:n("tolEspessura"),
+    pesoAssado:n("padPesoAssado"),
+    quebraAgua:n("padQuebraAgua"), tolQuebraAgua:n("tolQuebraAgua"),
+    umidadeMax:n("padUmidadeMax"),
+    tempoForno:n("padTempoForno"), tolTempoForno:n("tolTempoForno"),
+    tempForno:n("padTempForno"), tolTempForno:n("tolTempForno"),
+    pesoPacote:n("padPesoPacote"), tolPesoPacote:n("tolPesoPacote"),
+    pacotesMin:n("padPacotesMin"),
+    entregaKg:n("padEntregaKg")
+  };
+
+  salvarLocal();
+  document.getElementById("linhaAuditoria").value = l.id;
+  calcularAuditoria();
+  alert("Padrão salvo para " + l.nome);
+}
+
+function desvioPct(real, padrao){
+  if(!padrao) return 999;
+  return Math.abs((real - padrao) / padrao * 100);
+}
+
+function scorePorDesvio(desvio, tolerancia){
+  if(tolerancia <= 0) tolerancia = 1;
+  if(desvio <= tolerancia) return 100;
+  const excesso = desvio - tolerancia;
+  return Math.max(0, 100 - excesso * 8);
+}
+
+function scoreMenorMelhor(real, limite){
+  if(real <= limite) return 100;
+  const excesso = real - limite;
+  return Math.max(0, 100 - excesso * 12);
+}
+
+function scoreMaiorMelhor(real, padrao){
+  if(padrao <= 0) return 100;
+  const pct = real / padrao * 100;
+  if(pct >= 100) return 100;
+  return Math.max(0, pct);
+}
+
+function statusPorScore(s){
+  if(s >= 90) return {face:"😃", classe:"ok", nome:"DENTRO DO PADRÃO"};
+  if(s >= 75) return {face:"😐", classe:"warn", nome:"ATENÇÃO"};
+  return {face:"😢", classe:"bad", nome:"FORA DO PADRÃO"};
+}
+
+function calcularAuditoria(){
+  const linha = linhaSelecionada("linhaAuditoria");
+  if(!linha) return;
+  const p = linha.padrao;
+
+  const pesoCru = n("realPesoCru");
+  const espessura = n("realEspessura");
+  const deformadas = n("realDeformadas");
+  const quebraMoldagem = n("realQuebraMoldagem");
+
+  const pesoAssado = n("realPesoAssado");
+  const umidade = n("realUmidade");
+  const tempoForno = n("realTempoForno");
+  const tempForno = n("realTempForno");
+
+  const pesoPacote = n("realPesoPacote");
+  const pacotesMin = n("realPacotesMin");
+  const entregaKg = n("realEntregaKg");
+  const refugo = n("realRefugo");
+
+  const quebraAgua = pesoCru > 0 ? (pesoCru - pesoAssado) / pesoCru * 100 : 0;
+
+  const scorePesoCru = scorePorDesvio(desvioPct(pesoCru,p.pesoCru), p.tolPesoCru);
+  const scoreEspessura = scorePorDesvio(desvioPct(espessura,p.espessura), p.tolEspessura);
+  const scoreDeformadas = scoreMenorMelhor(deformadas, 3);
+  const scoreQuebraMold = scoreMenorMelhor(quebraMoldagem, 2.5);
+  const scoreMoldagem = (scorePesoCru*0.35 + scoreEspessura*0.30 + scoreDeformadas*0.20 + scoreQuebraMold*0.15);
+
+  const scoreQuebraAgua = scorePorDesvio(desvioPct(quebraAgua,p.quebraAgua), p.tolQuebraAgua);
+  const scoreUmidade = scoreMenorMelhor(umidade, p.umidadeMax);
+  const scoreTempoForno = scorePorDesvio(desvioPct(tempoForno,p.tempoForno), p.tolTempoForno);
+  const scoreTempForno = Math.abs(tempForno - p.tempForno) <= p.tolTempForno ? 100 : Math.max(0, 100 - (Math.abs(tempForno - p.tempForno) - p.tolTempForno) * 5);
+  const scoreForno = (scoreQuebraAgua*0.35 + scoreUmidade*0.25 + scoreTempoForno*0.20 + scoreTempForno*0.20);
+
+  const scorePesoPacote = scorePorDesvio(desvioPct(pesoPacote,p.pesoPacote), p.tolPesoPacote);
+  const scorePacotesMin = scoreMaiorMelhor(pacotesMin, p.pacotesMin);
+  const scoreEntrega = scoreMaiorMelhor(entregaKg, p.entregaKg);
+  const scoreRefugo = scoreMenorMelhor(refugo, 2);
+  const scoreEmp = (scorePesoPacote*0.30 + scorePacotesMin*0.25 + scoreEntrega*0.30 + scoreRefugo*0.15);
+
+  const geral = scoreMoldagem*0.34 + scoreForno*0.36 + scoreEmp*0.30;
+  const st = statusPorScore(geral);
+  const stMold = statusPorScore(scoreMoldagem);
+  const stForno = statusPorScore(scoreForno);
+  const stEmp = statusPorScore(scoreEmp);
+  const entregaPct = p.entregaKg > 0 ? entregaKg / p.entregaKg * 100 : 100;
+
+  resultadoAtual = {
+    id: Date.now(),
+    data: new Date().toLocaleString("pt-BR"),
+    linhaId: linha.id,
+    linhaNome: linha.nome,
+    tipo: linha.tipo,
+    produto:p.produto,
+    lote:v("lote") || "-",
+    auditor:v("auditor") || "-",
+    turno:v("turno") || "-",
+    observacoes:v("observacoes") || "-",
+    pesoCru, espessura, deformadas, quebraMoldagem,
+    pesoAssado, umidade, tempoForno, tempForno,
+    pesoPacote, pacotesMin, entregaKg, refugo,
+    quebraAgua,
+    scoreMoldagem, scoreForno, scoreEmp, geral, entregaPct,
+    status:st, stMold, stForno, stEmp,
+    padrao: JSON.parse(JSON.stringify(p))
+  };
+
+  atualizarPainel();
+  desenharGraficos();
+}
+
+function atualizarPainel(){
+  const r = resultadoAtual;
+  if(!r) return;
+
+  txt("rFace", r.status.face);
+  txt("rStatus", "<span class='pill "+r.status.classe+"'>"+r.status.nome+"</span>");
+
+  txt("rGeral", fmt(r.geral,1) + "%");
+  txt("rGeralDetalhe", "Média: moldagem, forneamento e empacotamento");
+
+  txt("rAgua", fmt(r.quebraAgua,2) + "%");
+  txt("rAguaDetalhe", "Padrão: " + fmt(r.padrao.quebraAgua,2) + "%");
+
+  txt("rEntrega", fmt(r.entregaPct,1) + "%");
+  txt("rEntregaDetalhe", fmt(r.entregaKg,1) + " kg de " + fmt(r.padrao.entregaKg,1) + " kg");
+
+  txt("rMoldagem", fmt(r.scoreMoldagem,1) + "%");
+  txt("rMoldagemDetalhe", "<span class='pill "+r.stMold.classe+"'>"+r.stMold.nome+"</span>");
+
+  txt("rForno", fmt(r.scoreForno,1) + "%");
+  txt("rFornoDetalhe", "<span class='pill "+r.stForno.classe+"'>"+r.stForno.nome+"</span>");
+
+  txt("rEmpacotamento", fmt(r.scoreEmp,1) + "%");
+  txt("rEmpDetalhe", "<span class='pill "+r.stEmp.classe+"'>"+r.stEmp.nome+"</span>");
+
+  txt("rResultado", r.geral >= 90 ? "APROVADO" : r.geral >= 75 ? "ATENÇÃO" : "REPROVADO");
+  txt("rResultadoDetalhe", r.status.nome);
+}
+
+function salvarAuditoria(){
+  calcularAuditoria();
+  if(!resultadoAtual) return;
+  auditorias.unshift(resultadoAtual);
+  auditorias = auditorias.slice(0, 100);
+  salvarLocal();
+  renderizarAuditorias();
+  alert("Auditoria salva.");
+}
+
+function limparAuditorias(){
+  if(!confirm("Limpar todas as auditorias salvas?")) return;
+  auditorias = [];
+  salvarLocal();
+  renderizarAuditorias();
+}
+
+function renderizarAuditorias(){
+  const tb = document.getElementById("tabelaAuditorias");
+  tb.innerHTML = "";
+  if(auditorias.length === 0){
+    tb.innerHTML = `<tr><td colspan="8">Nenhuma auditoria salva ainda.</td></tr>`;
+    return;
+  }
+  auditorias.forEach(a=>{
+    tb.innerHTML += `
+      <tr>
+        <td>${a.data}</td>
+        <td>${a.linhaNome}</td>
+        <td>${fmt(a.geral,1)}%</td>
+        <td>${fmt(a.scoreMoldagem,1)}%</td>
+        <td>${fmt(a.scoreForno,1)}%</td>
+        <td>${fmt(a.scoreEmp,1)}%</td>
+        <td>${fmt(a.entregaPct,1)}%</td>
+        <td style="font-size:24px">${a.status.face}</td>
+      </tr>`;
+  });
+}
+
+function desenharGraficos(){
+  if(!resultadoAtual) return;
+  desenharGraficoSetores();
+  desenharGraficoEntrega();
+}
+
+function desenharGraficoSetores(){
+  const c = document.getElementById("chartSetores");
+  const ctx = c.getContext("2d");
+  const W = c.width, H = c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  const dadosGraf = [
+    ["Moldagem", resultadoAtual.scoreMoldagem],
+    ["Forno", resultadoAtual.scoreForno],
+    ["Empac.", resultadoAtual.scoreEmp],
+    ["Geral", resultadoAtual.geral]
+  ];
+  const margem = 50;
+  const bw = 95;
+  const gap = 55;
+  ctx.strokeStyle="#222";
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(margem, 25);
+  ctx.lineTo(margem, H-45);
+  ctx.lineTo(W-20, H-45);
+  ctx.stroke();
+
+  for(let y=0;y<=100;y+=25){
+    const py = H-45 - (y/100)*(H-80);
+    ctx.strokeStyle="#ddd";
+    ctx.beginPath();
+    ctx.moveTo(margem,py);
+    ctx.lineTo(W-20,py);
+    ctx.stroke();
+    ctx.fillStyle="#333";
+    ctx.font="12px Arial";
+    ctx.fillText(y+"%", 12, py+4);
+  }
+
+  dadosGraf.forEach((d,i)=>{
+    const val = d[1];
+    const x = margem+35+i*(bw+gap);
+    const h = (val/100)*(H-80);
+    const y = H-45-h;
+    ctx.fillStyle = val>=90 ? "#22c55e" : val>=75 ? "#eab308" : "#ef4444";
+    roundRect(ctx,x,y,bw,h,8,true,false);
+    ctx.fillStyle="#111827";
+    ctx.font="bold 14px Arial";
+    ctx.fillText(fmt(val,1)+"%", x+20, y-8);
+    ctx.font="13px Arial";
+    ctx.fillText(d[0], x+10, H-20);
+  });
+}
+
+function desenharGraficoEntrega(){
+  const c = document.getElementById("chartEntrega");
+  const ctx = c.getContext("2d");
+  const W = c.width, H = c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#ffffff";
+  ctx.fillRect(0,0,W,H);
+
+  const planejado = resultadoAtual.padrao.entregaKg;
+  const real = resultadoAtual.entregaKg;
+  const max = Math.max(planejado, real) * 1.20 || 1;
+  const itens = [["Planejado", planejado, "#58b7ff"], ["Real", real, real>=planejado?"#22c55e":"#ef4444"]];
+  const margem = 70;
+
+  ctx.strokeStyle="#222";
+  ctx.beginPath();
+  ctx.moveTo(margem,25);
+  ctx.lineTo(margem,H-50);
+  ctx.lineTo(W-20,H-50);
+  ctx.stroke();
+
+  itens.forEach((d,i)=>{
+    const x = margem+80+i*190;
+    const h = (d[1]/max)*(H-90);
+    const y = H-50-h;
+    ctx.fillStyle=d[2];
+    roundRect(ctx,x,y,120,h,10,true,false);
+    ctx.fillStyle="#111827";
+    ctx.font="bold 15px Arial";
+    ctx.fillText(fmt(d[1],1)+" kg", x+12, y-10);
+    ctx.font="13px Arial";
+    ctx.fillText(d[0], x+28, H-22);
+  });
+
+  ctx.fillStyle="#111827";
+  ctx.font="bold 16px Arial";
+  ctx.fillText("Entrega: " + fmt(resultadoAtual.entregaPct,1) + "%", W-180, 35);
+}
+
+function desenhar(){
+  const c = document.getElementById("canvas");
+  const ctx = c.getContext("2d");
+  const W = c.width, H = c.height;
+  t += 0.035;
+  ctx.clearRect(0,0,W,H);
+
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#fff8ea");
+  grad.addColorStop(1,"#dcecff");
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,H);
+
+  const r = resultadoAtual || {geral:0, scoreMoldagem:0, scoreForno:0, scoreEmp:0, status:{face:"😐",nome:"SEM DADOS"}, quebraAgua:0, entregaPct:0};
+
+  ctx.fillStyle="#102033";
+  ctx.font="bold 24px Arial";
+  ctx.fillText("Auditoria visual da fabricação", 28, 38);
+  ctx.font="15px Arial";
+  ctx.fillText("Moldagem → Forneamento → Empacotamento → Entrega", 28, 62);
+
+  drawStation(ctx, 55, 120, "MOLDAGEM", r.scoreMoldagem, "⚙️");
+  drawArrow(ctx, 250, 190, 330, 190);
+  drawStation(ctx, 345, 120, "FORNO", r.scoreForno, "🔥");
+  drawArrow(ctx, 540, 190, 620, 190);
+  drawStation(ctx, 635, 120, "EMPAC.", r.scoreEmp, "📦");
+  drawArrow(ctx, 830, 190, 910, 190);
+  drawStation(ctx, 925, 120, "ENTREGA", r.entregaPct, "🚚");
+
+  drawCookies(ctx);
+
+  ctx.fillStyle="rgba(8,17,31,.92)";
+  ctx.strokeStyle="#f0b35b";
+  ctx.lineWidth=2;
+  roundRect(ctx, 55, 300, 950, 90, 18, true, true);
+
+  ctx.fillStyle="#ffe0b5";
+  ctx.font="bold 18px Arial";
+  ctx.fillText("Resultado geral da auditoria", 80, 328);
+
+  ctx.font="48px Arial";
+  ctx.fillText(r.status.face, 80, 378);
+
+  ctx.fillStyle="#eaf5ff";
+  ctx.font="bold 22px Arial";
+  ctx.fillText(fmt(r.geral,1) + "% - " + r.status.nome, 145, 358);
+
+  ctx.font="14px Arial";
+  ctx.fillText("Quebra de água: " + fmt(r.quebraAgua,2) + "% | Entrega: " + fmt(r.entregaPct,1) + "%", 145, 382);
+
+  requestAnimationFrame(desenhar);
+}
+
+function drawStation(ctx,x,y,title,score,emoji){
+  const classe = score>=90 ? "#22c55e" : score>=75 ? "#eab308" : "#ef4444";
+  ctx.save();
+  ctx.fillStyle="#1f2937";
+  roundRect(ctx,x,y,170,140,22,true,false);
+
+  ctx.fillStyle=classe;
+  ctx.globalAlpha=.18;
+  roundRect(ctx,x+10,y+10,150,120,18,true,false);
+  ctx.globalAlpha=1;
+
+  ctx.fillStyle="#ffffff";
+  ctx.font="bold 16px Arial";
+  ctx.fillText(title,x+28,y+30);
+
+  ctx.font="42px Arial";
+  ctx.fillText(emoji,x+62,y+82);
+
+  ctx.fillStyle=classe;
+  roundRect(ctx,x+25,y+105,120,14,999,true,false);
+  ctx.fillStyle="#ffffff";
+  ctx.font="bold 13px Arial";
+  ctx.fillText(fmt(score,0)+"%",x+68,y+117);
+  ctx.restore();
+}
+
+function drawArrow(ctx,x1,y1,x2,y2){
+  ctx.save();
+  ctx.strokeStyle="#58b7ff";
+  ctx.fillStyle="#58b7ff";
+  ctx.lineWidth=5;
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-16,y2-10);
+  ctx.lineTo(x2-16,y2+10);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawCookies(ctx){
+  ctx.save();
+  for(let i=0;i<16;i++){
+    const p = ((i/16)+t*0.12)%1;
+    const x = 65+p*910;
+    const y = 250+Math.sin(p*12+t)*5;
+    ctx.fillStyle = x<340 ? "#e9bd73" : x<630 ? "#b77935" : "#fbbf24";
+    ctx.strokeStyle="#6b3c16";
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    if(x<630) ctx.ellipse(x,y,18,10,0,0,Math.PI*2);
+    else roundRect(ctx,x-20,y-12,40,24,6,true,false);
+    ctx.fill();
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function atualizarRelatorio(){
+  calcularAuditoria();
+  const r = resultadoAtual;
+  if(!r) return;
+
+  txt("repData", "Data de emissão: " + new Date().toLocaleString("pt-BR"));
+  txt("repLinha", r.linhaNome);
+  txt("repProduto", r.produto);
+  txt("repLote", r.lote);
+  txt("repAuditor", r.auditor + " / " + r.turno);
+  txt("repFace", r.status.face + " " + r.status.nome);
+  txt("repGeral", fmt(r.geral,1) + "%");
+  txt("repMoldagem", fmt(r.scoreMoldagem,1) + "%");
+  txt("repForno", fmt(r.scoreForno,1) + "%");
+  txt("repEmp", fmt(r.scoreEmp,1) + "%");
+  txt("repAgua", fmt(r.quebraAgua,2) + "%");
+  txt("repEntrega", fmt(r.entregaPct,1) + "%");
+  txt("repResultado", r.geral >= 90 ? "APROVADO" : r.geral >= 75 ? "ATENÇÃO" : "REPROVADO");
+  txt("repObs", r.observacoes);
+
+  document.getElementById("repTabela").innerHTML = `
+    <tr>
+      <td>Moldagem</td>
+      <td>Peso cru ${fmt(r.pesoCru,2)} g; espessura ${fmt(r.espessura,2)} mm; deformadas ${fmt(r.deformadas,1)}%; quebra moldagem ${fmt(r.quebraMoldagem,1)}%</td>
+      <td>Peso cru ${fmt(r.padrao.pesoCru,2)} g ±${fmt(r.padrao.tolPesoCru,1)}%; espessura ${fmt(r.padrao.espessura,2)} mm ±${fmt(r.padrao.tolEspessura,1)}%</td>
+      <td>${fmt(r.scoreMoldagem,1)}% - ${r.stMold.nome}</td>
+    </tr>
+    <tr>
+      <td>Forneamento</td>
+      <td>Peso assado ${fmt(r.pesoAssado,2)} g; umidade ${fmt(r.umidade,1)}%; tempo ${fmt(r.tempoForno,1)} min; temperatura ${fmt(r.tempForno,0)} °C</td>
+      <td>Peso assado ${fmt(r.padrao.pesoAssado,2)} g; umidade máx. ${fmt(r.padrao.umidadeMax,1)}%; tempo ${fmt(r.padrao.tempoForno,1)} min; temp. ${fmt(r.padrao.tempForno,0)} °C</td>
+      <td>${fmt(r.scoreForno,1)}% - ${r.stForno.nome}</td>
+    </tr>
+    <tr>
+      <td>Quebra de água</td>
+      <td>${fmt(r.quebraAgua,2)}%</td>
+      <td>Padrão ${fmt(r.padrao.quebraAgua,2)}% ±${fmt(r.padrao.tolQuebraAgua,1)}%</td>
+      <td>${Math.abs(r.quebraAgua-r.padrao.quebraAgua) <= r.padrao.quebraAgua*r.padrao.tolQuebraAgua/100 ? "Dentro" : "Fora / atenção"}</td>
+    </tr>
+    <tr>
+      <td>Empacotamento</td>
+      <td>Peso pacote ${fmt(r.pesoPacote,0)} g; ${fmt(r.pacotesMin,1)} pacotes/min; refugo ${fmt(r.refugo,1)}%</td>
+      <td>Peso pacote ${fmt(r.padrao.pesoPacote,0)} g ±${fmt(r.padrao.tolPesoPacote,1)}%; ${fmt(r.padrao.pacotesMin,1)} pacotes/min</td>
+      <td>${fmt(r.scoreEmp,1)}% - ${r.stEmp.nome}</td>
+    </tr>
+    <tr>
+      <td>Entrega da fabricação</td>
+      <td>${fmt(r.entregaKg,1)} kg entregues</td>
+      <td>${fmt(r.padrao.entregaKg,1)} kg planejados</td>
+      <td>${fmt(r.entregaPct,1)}%</td>
+    </tr>
+  `;
+}
+
+function imprimirRelatorio(){
+  atualizarRelatorio();
+  setTimeout(()=>window.print(),200);
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+
+document.querySelectorAll("input,select,textarea").forEach(el=>{
+  el.addEventListener("input",()=>{ if(resultadoAtual) calcularAuditoria(); });
+  el.addEventListener("change",()=>{ if(resultadoAtual) calcularAuditoria(); });
+});
+
+carregar();
+desenhar();
+</script>
+</body>
+</html>
